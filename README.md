@@ -13,7 +13,27 @@ echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/source
 sudo apt-get update && sudo apt-get install yarn
 ```
 
+# setup alias
+```shell
+echo alias y=yarn >> /home/ {{YOUR USER}}/.bashrc
+```
+
+# restart shell
+```shell
+exec bash
+```
+
 # install dependencies
 ```shell
-yarn install
+y install
+```
+
+# watch changes (unminified)
+```shell
+y dev
+```
+
+# build for production (minified)
+```shell
+y prod
 ```
