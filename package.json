@@ -1,0 +1,12 @@
+{
+  "name": "LAB-MSERRANO",
+  "version": "0.0.0",
+  "description": "to the lab",
+  "main": "index.js",
+  "repository": "https://github.com/mserrano-dev/LAB-MSERRANO.git",
+  "author": "ENTslug",
+  "license": "Apache 2.0",
+  "dependencies": {
+    "angular": "1.6.5"
+  }
+}
