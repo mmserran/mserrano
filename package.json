@@ -7,9 +7,14 @@
   "author": "ENTslug",
   "license": "Apache-2.0",
   "dependencies": {
-    "angular": "1.6.5"
+    "angular": "1.6.5",
+    "angular-route": "1.6.5"
   },
   "scripts": {
-        "preinstall": "(yarn global list | grep -q 'webpack') && : || yarn global add webpack"
+    "preinstall": "(yarn global list | grep -q 'webpack') && : || yarn global add webpack"
+  },
+  "devDependencies": {
+    "uglifyjs-webpack-plugin": "0.4.6",
+    "webpack": "3.5.4"
   }
 }
