@@ -1,4 +1,6 @@
 angular.module('lab.controllers')
-        .controller('LandingCtrl', function () {
-            console.log('hello, this is landing ctrl');
-        });
+        .controller('LandingCtrl', module.exports);
+
+module.exports = function () {
+    console.log('hello, this is landing ctrl');
+};
