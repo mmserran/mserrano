@@ -17,6 +17,7 @@
     "?": "webpack --verbose"
   },
   "devDependencies": {
+    "html-loader": "^0.5.1",
     "uglifyjs-webpack-plugin": "0.4.6",
     "webpack": "3.5.4"
   }

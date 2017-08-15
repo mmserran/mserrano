@@ -7,6 +7,16 @@ const config = {
         filename: './public/lab.mserrano.js',
         path: path.resolve(__dirname)
     },
+    module: {
+        rules: [
+            {
+                test: /\.(html)$/,
+                use: {
+                    loader: 'html-loader',
+                }
+            }
+        ]
+    },
     plugins: []
 };
 
