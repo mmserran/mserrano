@@ -1,3 +1,5 @@
+require('./landing.scss');
+
 angular.module('lab.controllers')
         .controller('LandingCtrl', module.exports);
 
