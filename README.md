@@ -37,3 +37,8 @@ y dev
 ```shell
 y prod
 ```
+
+# build info (webpack --verbose)
+```shell
+y ?
+```
