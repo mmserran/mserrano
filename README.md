@@ -2,7 +2,17 @@
 
 # install node
 ```shell
-sudo apt-get install nodejs-legacy
+sudo apt-get install nodejs
+node -v
+```
+* NOTE
+*  yarn requires node >= v6.11.5
+*  17.10 (Artful Aardvark) was released with node v6.11.4
+*  below will upgrade node to v8.x
+```shell
+sudo apt-get install curl
+curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+sudo apt-get remove nodejs && sudo apt-get install nodejs
 ```
 
 # install yarn (debian)
@@ -40,5 +50,5 @@ y prod
 
 # build info (webpack --verbose)
 ```shell
-y ?
+y ? 
 ```
