@@ -2,10 +2,9 @@
 
 class checker extends page_base {
 
-    public function build() {
-        error_log(print_r(cst_infrastructure::result, true));
-        error_log(print_r($this->get, true));
-        error_log(print_r($this->post, true));
+    public function build(output $output) {
+        $this->set_response_pass();
+        $output->format($this->response, output::json);
     }
 
 }

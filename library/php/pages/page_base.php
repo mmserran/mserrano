@@ -12,7 +12,7 @@ abstract class page_base {
         $this->response[cst_infrastructure::result] = cst_infrastructure::fail;
     }
 
-    abstract public function build();
+    abstract public function build(output $output);
 
     // --- functions ---
     public function register_input(input $input) {

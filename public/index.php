@@ -12,7 +12,9 @@ if (is_null($midtier) === false) {
     $midtier->register_input($input);
 
     // build it
-    $midtier->build();
+    $output = new output();
+    $midtier->build($output);
 
     // print it
+    $output->print_it();
 }
