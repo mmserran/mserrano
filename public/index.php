@@ -9,8 +9,10 @@ $midtier = router::get_page($root);
 if (is_null($midtier) === false) {
     // collect get, post, files
     $input = new input($_GET, $_POST);
+    $midtier->register_input($input);
 
     // build it
+    $midtier->build();
 
     // print it
 }

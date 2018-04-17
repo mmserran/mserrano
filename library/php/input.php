@@ -2,9 +2,25 @@
 
 class input {
 
-    function __construct($get, $post) {
-        error_log(print_r($get, true));
+    const get = 'get';
+    const post = 'post';
+
+    protected $data;
+
+    public function __construct($get, $post) {
+        $this->data = array(
+            input::get => $get,
+            input::post => $post,
+        );
     }
 
-    // --- helpers ---
+    // --- functions ---
+    public function data($type) {
+        $return = null;
+        if (isset($this->data[$type]) === true) {
+            $return = $this->data[$type];
+        }
+        return $return;
+    }
+
 }
