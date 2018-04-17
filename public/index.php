@@ -7,14 +7,12 @@ require(sprintf('%s/autoloader.php', $library));
 autoloader::library($library);
 
 // get midtier
-
+$midtier = router::get_page();
+if(is_null($midtier) === false) {
     // collect get, post, files
     $input = new input($_GET, $_POST);
-
-    $path = $_SERVER['REDIRECT_URL'];
-    error_log(print_r($path, true));
-
 
     // build it
 
     // print it
+}
