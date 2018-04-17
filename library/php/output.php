@@ -4,6 +4,7 @@ class output {
 
     const raw = 'raw';
     const json = 'json';
+    const angular = 'angular';
     const pretty = 'pretty';
 
     protected $headers;
@@ -29,6 +30,10 @@ class output {
         switch ($type) {
             case output::json:
                 $data = json_encode($content);
+                $this->add_header('Content-Type: application/json');
+                break;
+            case output::angular:
+                $data = sprintf(")]}',\n%s", json_encode($content));
                 $this->add_header('Content-Type: application/json');
                 break;
             case output::pretty:
