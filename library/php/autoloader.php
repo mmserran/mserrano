@@ -4,9 +4,9 @@ class autoloader {
 
     const max_depth = 1;
 
-    static public function library($dir) {
-        $main_dir = sprintf('%s/*', $dir);
-        autoloader::load_dir($main_dir);
+    static public function library($root) {
+        $lib_dir = sprintf('%s/library/php/*', $root);
+        autoloader::load_dir($lib_dir);
     }
 
     // --- helpers ---
