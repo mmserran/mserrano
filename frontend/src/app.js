@@ -1,6 +1,9 @@
-module.exports = require('angular')
-        .module("lab", [
-            require("angular-route"),
-            require("../build/controllers.js").name,
-            require("../build/routing.js").name,
-        ]);
+angular.module("lab", [
+    "lab.constants",
+    "lab.controllers",
+    "lab.routing",
+]);
+
+angular.module("lab.constants", []);
+angular.module("lab.controllers", []);
+angular.module("lab.routing", ["ngRoute"]);
