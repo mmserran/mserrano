@@ -28,6 +28,13 @@ sudo apt-get update && sudo apt-get install yarn
 echo alias y=yarn >> /home/ {{YOUR USER}}/.bashrc
 ```
 
+# install composer
+https://getcomposer.org/download/
+```shell
+mv composer.phar /usr/local/bin/composer
+composer install
+```
+
 # restart shell
 ```shell
 exec bash
@@ -58,16 +65,14 @@ y test
 y cov
 ```
 
+# run PHP tests
+```shell
+y php
+```
+
 # build info (webpack --verbose)
 ```shell
 y ? 
-```
-
-# install composer
-https://getcomposer.org/download/
-```shell
-mv composer.phar /usr/local/bin/composer
-composer install
 ```
 
 # Recommended .gitignore
