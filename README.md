@@ -48,6 +48,11 @@ y dev
 y prod
 ```
 
+# run JS tests
+```shell
+y test
+```
+
 # build info (webpack --verbose)
 ```shell
 y ? 
