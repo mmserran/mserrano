@@ -1,4 +1,4 @@
-module.exports = angular.module("lab.routing")
+angular.module("lab.routing")
         .config(["$routeProvider",
             function ($routeProvider) {
                 $routeProvider.when('/', {

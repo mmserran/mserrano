@@ -3,9 +3,12 @@ const webpack = require('webpack');
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 
 const config = {
-    entry: './frontend/build/entry.js',
+    entry: {
+        vendor: './frontend/build/vendor.js',
+        lab: './frontend/build/entry.js',
+    },
     output: {
-        filename: './public/lab.mserrano.js',
+        filename: './public/[name].mserrano.js',
         path: path.resolve(__dirname)
     },
     module: {
