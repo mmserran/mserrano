@@ -53,6 +53,11 @@ y prod
 y test
 ```
 
+# run JS coverage tests
+```shell
+y cov
+```
+
 # build info (webpack --verbose)
 ```shell
 y ? 

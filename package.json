@@ -16,15 +16,17 @@
     "dev": "webpack --mode development --watch",
     "prod": "webpack --mode production",
     "test": "yarn karma start frontend/tests/karma.conf.js",
+    "cov": "yarn karma start frontend/tests/coverage.conf.js && google-chrome tmp/index.html",
     "?": "webpack --verbose"
   },
   "devDependencies": {
     "css-loader": "0.28.11",
     "extract-text-webpack-plugin": "4.0.0-beta.0",
     "html-loader": "0.5.5",
-    "jasmine": "3.1.0",
+    "jasmine": "2.9.0",
     "karma": "2.0.0",
     "karma-chrome-launcher": "2.2.0",
+    "karma-coverage": "1.1.1",
     "karma-jasmine": "1.1.1",
     "karma-phantomjs-launcher": "1.0.4",
     "node-sass": "4.8.3",
