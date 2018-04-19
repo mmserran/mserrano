@@ -24,6 +24,7 @@
     "html-loader": "0.5.5",
     "jasmine": "3.1.0",
     "karma": "2.0.0",
+    "karma-chrome-launcher": "2.2.0",
     "karma-jasmine": "1.1.1",
     "karma-phantomjs-launcher": "1.0.4",
     "node-sass": "4.8.3",

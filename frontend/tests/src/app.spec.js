@@ -1,15 +1,18 @@
 "use strict";
 
 describe("!! app.js !! ", function () {
+    // bootstrap angular
     beforeEach(function () {
         module("lab");
     });
 
+    // setup test case
     var rnd;
     beforeEach(function () {
         rnd = helper.number.rand();
     });
 
+    // teardown
     var obj;
     afterEach(function () {
         obj = null;
@@ -34,7 +37,7 @@ describe("!! app.js !! ", function () {
             });
 
             it("is missing ngRoute", function () {
-                var obj = angular.module("lab.routing");
+                obj = angular.module("lab.routing");
                 helper.expect.in_array("ngRoute", obj.requires);
             });
         });
