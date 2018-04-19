@@ -62,3 +62,21 @@ y cov
 ```shell
 y ? 
 ```
+
+# install composer
+https://getcomposer.org/download/
+```shell
+mv composer.phar /usr/local/bin/composer
+composer install
+```
+
+# Recommended .gitignore
+```
+/nbproject/**
+/.gitignore
+/node_modules/**
+/tmp/**
+yarn-error.log
+/composer.phar
+/vendor/**
+```
