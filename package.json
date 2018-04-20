@@ -15,9 +15,9 @@
     "preinstall": "(yarn global list | grep -q 'webpack') && : || yarn global add webpack",
     "dev": "webpack --mode development --watch",
     "prod": "webpack --mode production",
-    "test": "yarn karma start frontend/tests/karma.conf.js",
-    "cov": "yarn karma start frontend/tests/coverage.conf.js && google-chrome tmp/index.html",
-    "php": "php test_runner.php unittests/",
+    "test": "yarn karma start frontend/tests/coverage.conf.js && php test_runner.php unittests/ --silent && google-chrome tmp/index.html",
+    "ut:js": "yarn karma start frontend/tests/karma.conf.js",
+    "ut:php": "php test_runner.php unittests/",
     "?": "webpack --verbose"
   },
   "devDependencies": {

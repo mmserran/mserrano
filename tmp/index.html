@@ -1,0 +1,45 @@
+<html>
+    <head>
+        <title>Code Coverage</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body {
+                margin: 0;
+                font-family: "Helvetica Neue", "Helvetica", "Arial", "sans-serif";
+            }
+            table {
+                height: 100%;
+                width: 90%;
+                margin: auto;
+                border-collapse: collapse;
+            }
+            iframe {
+                height: 100%;
+                width: 100%;
+            }
+            .title {
+                height: 50px;
+            }
+            .title span {
+                margin: 8px;
+            }
+        </style>
+    </head>
+    <body>
+        <table>
+            <tr class="title">
+                <td><span>PHP Coverage</span></td>
+            </tr>
+            <tr class="content">
+                <td><iframe src="./php-coverage-report/index.html"></iframe></td>
+            </tr>
+            <tr class="title">
+                <td><span>JavaScript Coverage</span></td>
+            </tr>
+            <tr class="content">
+                <td><iframe src="./js-coverage-report/index.html"></iframe></td>
+            </tr>
+        </table>
+    </body>
+</html>

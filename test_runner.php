@@ -11,8 +11,9 @@ class test_runner {
     protected $coverage;
     protected $error;
     protected $test_count;
+    protected $silent;
 
-    public function __construct() {
+    public function __construct($silent) {
         require_once('./vendor/autoload.php');
         require_once('./vendor/simpletest/simpletest/autorun.php');
 
@@ -20,6 +21,7 @@ class test_runner {
         $this->coverage = new SebastianBergmann\CodeCoverage\CodeCoverage(null, $filter);
         $this->error = null;
         $this->test_count = 0;
+        $this->silent = (empty($silent) == false);
     }
 
     public function __destruct() {
@@ -56,7 +58,9 @@ class test_runner {
     }
 
     protected function open_report_in_browser() {
-        exec(sprintf('%s tmp/php-coverage-report/index.html', test_runner::report_browser));
+        if ($this->silent === false) {
+            exec(sprintf('%s tmp/php-coverage-report/index.html', test_runner::report_browser));
+        }
     }
 
     protected function whitelist_corresponding($ut_root) {
@@ -168,6 +172,7 @@ class test_runner {
 
 // --- run it ---
 $src_dir = $argv[1]; // source directory for test files
+$silent_run = $argv[2]; // will not open browser if present
 
-$runner = new test_runner();
+$runner = new test_runner($silent_run);
 $runner->run_tests($src_dir);

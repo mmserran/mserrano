@@ -8,6 +8,7 @@ module.exports = function (config) {
             'public/vendor.mserrano.js',
             'library/javascript/angular-mocks.js',
             'frontend/src/*.js',
+            'public/lab.mserrano.js',
             'frontend/tests/helpers/helpers.*.js',
             'frontend/tests/src/*.spec.js',
         ],
@@ -17,7 +18,7 @@ module.exports = function (config) {
         },
         coverageReporter: {
             type: 'html',
-            dir: 'tmp/',
+            dir: 'tmp/js-coverage-report',
             subdir: '.',
         },
     });

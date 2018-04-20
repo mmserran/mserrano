@@ -45,9 +45,11 @@ phpize
 sudo make
 sudo make install
 ```
-# remove xdebug folder
-# take note of the path it spits out after make install and add line to php.ini
-# zend_extension={{YOUR LINE=/usr/lib/php/20160303}}/xdebug.so
+remove xdebug folder
+take note of the path it spits out after make install and add line to php.ini
+```shell
+zend_extension={{YOUR LINE=/usr/lib/php/20160303}}/xdebug.so
+```
 
 
 # restart shell
@@ -77,17 +79,17 @@ y prod
 
 # run JS tests
 ```shell
-y test
-```
-
-# run JS coverage tests
-```shell
-y cov
+y ut:js
 ```
 
 # run PHP tests
 ```shell
-y php
+y ut:php
+```
+
+# run JS & PHP coverage tests and open combined report view
+```shell
+y test
 ```
 
 # build info (webpack --verbose)
