@@ -12,9 +12,6 @@ class autoloaderTest extends UnitTestCase {
 
     function test_library() {
         $root = dirname(dirname(dirname(dirname(__FILE__))));
-        $test = sprintf('%s/library/php/autoloader.php', $root);
-        require($test);
-
         autoloader::library($root);
         $this->assertTrue(true);
     }
