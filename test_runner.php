@@ -5,7 +5,8 @@ class test_runner {
     const valid_unittest = '/^unittests(\/[a-z_]+)+\.test\.php$/'; // the convention
     //
     const report_testname = 'mserrano - test_runner';
-    const report_destination = './tmp/php-coverage-report';
+    const report_dest_html = './tmp/php-coverage-report';
+    const report_dest_xml = './tmp/php-coverage-report/index.xml';
     const report_browser = 'google-chrome';
 
     protected $coverage;
@@ -30,6 +31,7 @@ class test_runner {
         if (is_null($this->error) === true) {
             $this->create_coverage_report();
             $this->open_report_in_browser();
+            $this->open_report_in_terminal();
         } else {
             $this->raise_error();
         }
@@ -54,13 +56,64 @@ class test_runner {
     // --- functions ---
     protected function create_coverage_report() {
         $writer = new SebastianBergmann\CodeCoverage\Report\Html\Facade();
-        $writer->process($this->coverage, test_runner::report_destination);
+        $writer->process($this->coverage, test_runner::report_dest_html);
+
+        $writer = new SebastianBergmann\CodeCoverage\Report\Clover();
+        $writer->process($this->coverage, test_runner::report_dest_xml);
     }
 
     protected function open_report_in_browser() {
         if ($this->silent === false) {
             exec(sprintf('%s tmp/php-coverage-report/index.html', test_runner::report_browser));
         }
+    }
+
+    private function open_report_in_terminal() {
+        $xml_file = file_get_contents(test_runner::report_dest_xml);
+        $report = simplexml_load_string($xml_file);
+
+        echo sprintf("\e[36m%s\e[0m %s", '+++', PHP_EOL);
+
+        $total = array(
+            'covered' => 0,
+            'statement' => 0,
+            'stat' => 0,
+        );
+        foreach ($report->project as $obj) {
+            foreach ($obj->file as $file_info) {
+                $info = array(
+                    'file' => (string) $file_info->attributes()->name,
+                    'methods' => (integer) $file_info->metrics->attributes()->methods,
+                    'coveredmethods' => (integer) $file_info->metrics->attributes()->coveredmethods,
+                    'conditionals' => (integer) $file_info->metrics->attributes()->conditionals,
+                    'coveredconditionals' => (integer) $file_info->metrics->attributes()->coveredconditionals,
+                    'statements' => (integer) $file_info->metrics->attributes()->statements,
+                    'coveredstatements' => (integer) $file_info->metrics->attributes()->coveredstatements,
+                );
+
+                $list_path = explode('/', $info['file']);
+                $class_name = array_pop($list_path);
+                $path = sprintf('%s', implode('/', $list_path));
+                $statements = '';
+                if ($info['statements'] !== 0) {
+                    $stmt_coverage = (($info['coveredstatements'] / $info['statements']) * 100);
+                    $statements = sprintf('%.2f%%', $stmt_coverage);
+
+                    $total['statement'] += $info['statements'];
+                    $total['covered'] += $info['coveredstatements'];
+                }
+                $methods = '';
+                $count_missing = '';
+                if ($info['methods'] > $info['coveredmethods'] === true) {
+                    $count_missing = ($info['methods'] - $info['coveredmethods']);
+                    $methods = sprintf(' method%s untested !!', ($count_missing > 1 ? 's' : ''));
+                }
+                echo sprintf("%s\e[36m/%s\e[0m%s\e[47m\e[34m%s\e[0m\e[0m%s\e[1m%s\e[0m%s %s", $path, $class_name, ($statements === '' ? '' : ': '), $statements, ($count_missing > 0 ? ' - ' : ''), $count_missing, $methods, PHP_EOL);
+            }
+        }
+        echo sprintf("\e[36m%s\e[0m %s", '+++', PHP_EOL);
+        $total['stat'] = (($total['covered'] / $total['statement']) * 100);
+        echo sprintf("\e[1mTotal Statement Coverage\e[0m: \e[47m\e[34m%.2f%%\e[0m\e[0m (%s/%s lines)\e[36m.\e[0m %s", $total['stat'], $total['covered'], $total['statement'], PHP_EOL);
     }
 
     protected function whitelist_corresponding($ut_root) {
@@ -171,8 +224,8 @@ class test_runner {
 }
 
 // --- run it ---
-$msg = sprintf("%s%s\e[5m%s\e[0m\e[94mTEST RUN\e[0m:", PHP_EOL, PHP_EOL, '>>> ');
-echo sprintf("%s \e[7m\e[94m%s\e[0m\e[0m %s%s", $msg, date('Y-m-d H:i:s'), PHP_EOL, PHP_EOL);
+$msg = sprintf("%s%s\e[5m\e[36m%s\e[0m\e[0mTEST RUN:", PHP_EOL, PHP_EOL, '>>> ');
+echo sprintf("%s \e[36m%s\e[0m %s%s", $msg, date('Y-m-d H:i:s (g:i:s e)'), PHP_EOL, PHP_EOL);
 
 $src_dir = $argv[1]; // source directory for test files
 $silent_run = $argv[2]; // will not open browser if present
