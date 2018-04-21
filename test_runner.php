@@ -2,12 +2,12 @@
 
 class test_runner {
 
-    const valid_unittest = '/^unittests(\/[a-z_]+)+\.test\.php$/'; // the convention
+    const valid_unittest   = '/^unittests(\/[a-z_]+)+\.test\.php$/'; // the convention
     //
-    const report_testname = 'mserrano - test_runner';
+    const report_testname  = 'mserrano - test_runner';
     const report_dest_html = './tmp/php-coverage-report';
-    const report_dest_xml = './tmp/php-coverage-report/index.xml';
-    const report_browser = 'google-chrome';
+    const report_dest_xml  = './tmp/php-coverage-report/index.xml';
+    const report_browser   = 'google-chrome';
 
     protected $coverage;
     protected $error;
@@ -18,11 +18,13 @@ class test_runner {
         require_once('./vendor/autoload.php');
         require_once('./vendor/simpletest/simpletest/autorun.php');
 
-        $filter = new SebastianBergmann\CodeCoverage\Filter();
-        $this->coverage = new SebastianBergmann\CodeCoverage\CodeCoverage(null, $filter);
-        $this->error = null;
+        $filter           = new SebastianBergmann\CodeCoverage\Filter();
+        $this->coverage   = new SebastianBergmann\CodeCoverage\CodeCoverage(null, $filter);
+        $this->error      = null;
         $this->test_count = 0;
-        $this->silent = (empty($silent) == false);
+        $this->silent     = (empty($silent) == false);
+
+        $this->output_start_banner();
     }
 
     public function __destruct() {
@@ -33,7 +35,7 @@ class test_runner {
             $this->open_report_in_browser();
             $this->open_report_in_terminal();
         } else {
-            $this->raise_error();
+            $this->output_error_message();
         }
     }
 
@@ -46,22 +48,69 @@ class test_runner {
 
         if ($this->test_count === 0) {
             $this->error = array(
-                'file' => 'NO TESTS',
-                'msg' => 'none or all invalid',
-                'exclamation' => "\e[91m...\e[0m \e[1m(╯°□°）╯\e[0m\e[96m\e[5m=====)\e[0m\e[0m \e[33m┻━┻\e[0m",
+                'file'        => 'NO TESTS',
+                'msg'         => 'none or all invalid',
+                'exclamation' => $this->exclamation('kamehameha'),
             );
         }
     }
 
-    // --- functions ---
-    protected function create_coverage_report() {
-        $writer = new SebastianBergmann\CodeCoverage\Report\Html\Facade();
-        $writer->process($this->coverage, test_runner::report_dest_html);
+    // --- output ---
+    private function output_start_banner() {
+        $arrows = $this->style('cyan:blink', '>>>');
+        $date   = $this->style('cyan', date('Y-m-d H:i:s (g:i:s A e)'));
 
-        $writer = new SebastianBergmann\CodeCoverage\Report\Clover();
-        $writer->process($this->coverage, test_runner::report_dest_xml);
+        echo sprintf("%s%s%s TEST RUN: %s%s%s", PHP_EOL, PHP_EOL, $arrows, $date, PHP_EOL, PHP_EOL);
     }
 
+    private function output_report_decorator() {
+        echo sprintf("%s%s", $this->style('cyan', '+++'), PHP_EOL);
+    }
+
+    private function output_coverage_test($info) {
+        $statements = '';
+        if ($info['statements'] !== 0) {
+            $stmt_coverage = (($info['coveredstatements'] / $info['statements']) * 100);
+            $statements    = sprintf('%.2f%%', $stmt_coverage);
+        }
+        $list_path  = explode('/', $info['file']);
+        $class_name = array_pop($list_path);
+
+        $o_path     = sprintf("%s", implode('/', $list_path));
+        $o_class    = $this->style('cyan', '/' . $class_name);
+        $o_stmt     = $this->style('blue:light_gray_bg', $statements);
+        $o_untested = '';
+        if ($info['methods'] > $info['coveredmethods'] === true) {
+            $count_missing = ($info['methods'] - $info['coveredmethods']);
+            $o_untested    = sprintf(" - %s method%s untested !!", $this->style('bold', $count_missing), ($count_missing > 1 ? 's' : ''));
+        }
+        echo sprintf('%s%s: %s%s%s', $o_path, $o_class, $o_stmt, $o_untested, PHP_EOL);
+    }
+
+    private function output_end_stats($total) {
+        $label_lines_covered = $this->style('bold', 'Total Line Coverage');
+        $lines_covered       = $this->style('blue:light_gray_bg', sprintf("%.2f%%", $total['stat']['percent']));
+        $lines_as_fration    = sprintf(" (%s/%s) lines tested", $total['covered']['lines'], $total['uncovered']['lines']);
+        $blue_dot            = $this->style('cyan', '.');
+        $count_missing       = $this->style('bold:blink', $total['stat']['missing']);
+        $blue_exclamation    = $this->style('cyan', ' !!');
+
+        $total_lines = sprintf("%s: %s%s%s", $label_lines_covered, $lines_covered, $lines_as_fration, $blue_dot);
+        if ($total['stat']['missing'] > 0) {
+            $total_methods = sprintf("%s method%s untested%s", $count_missing, ($total['stat']['missing'] > 1 ? 's' : ''), $blue_exclamation);
+        }
+        echo sprintf("%s %s%s", $total_lines, $total_methods ?? '', PHP_EOL);
+    }
+
+    private function output_error_message() {
+        $file = $this->style('light_red:inverted', $this->error['file']);
+        $deco = $this->style('light_red', '!!');
+        $msg  = $this->style('light_red', $this->error['msg']);
+
+        echo sprintf("%s %s %s %s%s%s", $deco, $file, $deco, $msg, $this->error['exclamation'], PHP_EOL);
+    }
+
+    // --- functions ---
     protected function open_report_in_browser() {
         if ($this->silent === false) {
             exec(sprintf('%s tmp/php-coverage-report/index.html', test_runner::report_browser));
@@ -70,50 +119,47 @@ class test_runner {
 
     private function open_report_in_terminal() {
         $xml_file = file_get_contents(test_runner::report_dest_xml);
-        $report = simplexml_load_string($xml_file);
+        $report   = simplexml_load_string($xml_file);
 
-        echo sprintf("\e[36m%s\e[0m %s", '+++', PHP_EOL);
-
+        $this->output_report_decorator();
         $total = array(
-            'covered' => 0,
-            'statement' => 0,
-            'stat' => 0,
+            'covered'   => array('lines' => 0, 'methods' => 0),
+            'uncovered' => array('lines' => 0, 'methods' => 0),
+            'stat'      => array('percent' => 0, 'missing' => 0),
         );
         foreach ($report->project as $obj) {
             foreach ($obj->file as $file_info) {
                 $info = array(
-                    'file' => (string) $file_info->attributes()->name,
-                    'methods' => (integer) $file_info->metrics->attributes()->methods,
-                    'coveredmethods' => (integer) $file_info->metrics->attributes()->coveredmethods,
-                    'conditionals' => (integer) $file_info->metrics->attributes()->conditionals,
+                    'file'                => (string) $file_info->attributes()->name,
+                    'methods'             => (integer) $file_info->metrics->attributes()->methods,
+                    'coveredmethods'      => (integer) $file_info->metrics->attributes()->coveredmethods,
+                    'conditionals'        => (integer) $file_info->metrics->attributes()->conditionals,
                     'coveredconditionals' => (integer) $file_info->metrics->attributes()->coveredconditionals,
-                    'statements' => (integer) $file_info->metrics->attributes()->statements,
-                    'coveredstatements' => (integer) $file_info->metrics->attributes()->coveredstatements,
+                    'statements'          => (integer) $file_info->metrics->attributes()->statements,
+                    'coveredstatements'   => (integer) $file_info->metrics->attributes()->coveredstatements,
                 );
+                $this->output_coverage_test($info);
 
-                $list_path = explode('/', $info['file']);
-                $class_name = array_pop($list_path);
-                $path = sprintf('%s', implode('/', $list_path));
-                $statements = '';
-                if ($info['statements'] !== 0) {
-                    $stmt_coverage = (($info['coveredstatements'] / $info['statements']) * 100);
-                    $statements = sprintf('%.2f%%', $stmt_coverage);
-
-                    $total['statement'] += $info['statements'];
-                    $total['covered'] += $info['coveredstatements'];
-                }
-                $methods = '';
-                $count_missing = '';
-                if ($info['methods'] > $info['coveredmethods'] === true) {
-                    $count_missing = ($info['methods'] - $info['coveredmethods']);
-                    $methods = sprintf(' method%s untested !!', ($count_missing > 1 ? 's' : ''));
-                }
-                echo sprintf("%s\e[36m/%s\e[0m%s\e[47m\e[34m%s\e[0m\e[0m%s\e[1m%s\e[0m%s %s", $path, $class_name, ($statements === '' ? '' : ': '), $statements, ($count_missing > 0 ? ' - ' : ''), $count_missing, $methods, PHP_EOL);
+                $total['covered']['lines']     += $info['coveredstatements'];
+                $total['uncovered']['lines']   += $info['statements'];
+                $total['covered']['methods']   += $info['coveredmethods'];
+                $total['uncovered']['methods'] += $info['methods'];
             }
+            $total['stat']['percent'] = (($total['covered']['lines'] / $total['uncovered']['lines']) * 100);
+            $total['stat']['missing'] = ($total['uncovered']['methods'] - $total['covered']['methods']);
         }
-        echo sprintf("\e[36m%s\e[0m %s", '+++', PHP_EOL);
-        $total['stat'] = (($total['covered'] / $total['statement']) * 100);
-        echo sprintf("\e[1mTotal Statement Coverage\e[0m: \e[47m\e[34m%.2f%%\e[0m\e[0m (%s/%s lines)\e[36m.\e[0m %s", $total['stat'], $total['covered'], $total['statement'], PHP_EOL);
+        $this->output_report_decorator();
+        $this->output_end_stats($total);
+    }
+
+    protected function create_coverage_report() {
+        $writer = new SebastianBergmann\CodeCoverage\Report\Html\Facade();
+        $writer->process($this->coverage, test_runner::report_dest_html);
+
+        $writer = new SebastianBergmann\CodeCoverage\Report\Clover();
+        $writer->process($this->coverage, test_runner::report_dest_xml);
+
+        $writer = null;
     }
 
     protected function whitelist_corresponding($ut_root) {
@@ -151,38 +197,15 @@ class test_runner {
         }
     }
 
-    protected function raise_error() {
-        $file = sprintf("\e[91m!! \e[7m%s\e[0m \e[91m!!\e[0m", $this->error['file']);
-        $msg = sprintf("\e[91m%s\e[0m", $this->error['msg']);
-        $exclamation = sprintf("%s", $this->error['exclamation']);
-
-        echo sprintf("%s %s%s%s", $file, $msg, $exclamation, PHP_EOL);
-    }
-
     // --- helpers ---
-    private function strip_ut_dir($path) {
-        $list_path = explode('/', $path);
-        array_shift($list_path);
-
-        return sprintf('%s', implode('/', $list_path));
-    }
-
-    private function traverse_directory($dir, $function) {
-        $files = glob(sprintf('%s/*', $dir));
-        foreach ($files as $path) {
-            if (is_dir($path) === true) {
-                $this->traverse_directory($path, $function);
-            } else {
-                call_user_func($function, $path);
-            }
-        }
-    }
-
     private function do_whitelist($path) {
         $extension = pathinfo($path, PATHINFO_EXTENSION);
         if ($extension === 'php') {
-            $class = sprintf('./%s', $path);
-            $this->coverage->filter()->addDirectoryToWhitelist($class);
+            $list_dir = explode('/', pathinfo($path, PATHINFO_DIRNAME));
+            if (in_array('csts', $list_dir) === false) { // ignore /csts
+                $class = sprintf('./%s', $path);
+                $this->coverage->filter()->addDirectoryToWhitelist($class);
+            }
         }
     }
 
@@ -190,7 +213,7 @@ class test_runner {
         list($ut_dir, $path, $classname) = $this->dissect_convention($ut_filename);
 
         $utclass = sprintf('./%s/%s/%s.test.php', $ut_dir, $path, $classname);
-        $class = sprintf('./%s/%s.php', $path, $classname);
+        $class   = sprintf('./%s/%s.php', $path, $classname);
 
         $continue = true;
         $continue = $continue && (preg_match(test_runner::valid_unittest, $ut_filename, $matches));
@@ -205,29 +228,83 @@ class test_runner {
             $this->test_count += 1;
         } else {
             $this->error = array(
-                'file' => $ut_filename,
-                'msg' => 'no corresponding class found',
-                'exclamation' => "\e[91m...\e[0m \e[1m(╯°□°）╯\e[0m\e[96m\e[5m︵ \e[0m\e[0m \e[33m┻━┻\e[0m",
+                'file'        => $ut_filename,
+                'msg'         => 'no corresponding class found',
+                'exclamation' => $this->exclamation('flip'),
             );
         }
     }
 
-    private function dissect_convention($ut_filename) {
-        $path = explode('.', $ut_filename)[0];
+    private function traverse_directory($dir, $function) {
+        $files = glob(sprintf('%s/*', $dir));
+        foreach ($files as $path) {
+            if (is_dir($path) === true) {
+                $this->traverse_directory($path, $function);
+            } else {
+                call_user_func($function, $path);
+            }
+        }
+    }
+
+    private function strip_ut_dir($path) {
         $list_path = explode('/', $path);
-        $ut_dir = array_shift($list_path);
+        array_shift($list_path);
+
+        return sprintf('%s', implode('/', $list_path));
+    }
+
+    private function dissect_convention($ut_filename) {
+        $path      = explode('.', $ut_filename)[0];
+        $list_path = explode('/', $path);
+        $ut_dir    = array_shift($list_path);
         $classname = array_pop($list_path);
 
         return array($ut_dir, join('/', $list_path), $classname);
     }
 
+    private function exclamation($type) {
+        $dot_dot_dot = $this->style('light_red', '...');
+        $guy         = $this->style('bold', '(╯°□°）╯');
+        $swoosh      = array(
+            'flip'       => $this->style('light_cyan:blink', '︵'),
+            'kamehameha' => $this->style('light_cyan:blink', '=====)'),
+        );
+        $table       = $this->style('yellow', '┻━┻');
+
+        return sprintf("%s %s%s %s", $dot_dot_dot, $guy, $swoosh[$type], $table);
+    }
+
+    private function style($rules, $string) {
+        $list_rule          = explode(':', $rules);
+        $common_color_codes = array(
+            'bold'          => '1',
+            'blink'         => '5',
+            'inverted'      => '7',
+            //
+            'yellow'        => '33',
+            'blue'          => '34',
+            'cyan'          => '36',
+            'light_red'     => '91',
+            'light_cyan'    => '96',
+            //
+            'light_gray_bg' => '47',
+        );
+
+        $return = "";
+        $tail   = "";
+        foreach ($list_rule as $rule) {
+            if (isset($common_color_codes[$rule]) === true) {
+                $return .= sprintf("\e[%sm", $common_color_codes[$rule]);
+                $tail   .= "\e[0m";
+            }
+        }
+        return sprintf("%s%s%s", $return, $string, $tail);
+    }
+
 }
 
 // --- run it ---
-$msg = sprintf("%s%s\e[5m\e[36m%s\e[0m\e[0mTEST RUN:", PHP_EOL, PHP_EOL, '>>> ');
-echo sprintf("%s \e[36m%s\e[0m %s%s", $msg, date('Y-m-d H:i:s (g:i:s e)'), PHP_EOL, PHP_EOL);
-
-$src_dir = $argv[1]; // source directory for test files
+$src_dir    = $argv[1]; // source directory for test files
 $silent_run = $argv[2]; // will not open browser if present
 
 $runner = new test_runner($silent_run);
