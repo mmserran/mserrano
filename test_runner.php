@@ -171,6 +171,9 @@ class test_runner {
 }
 
 // --- run it ---
+$msg = sprintf("%s%s\e[5m%s\e[0m\e[94mTEST RUN\e[0m:", PHP_EOL, PHP_EOL, '>>> ');
+echo sprintf("%s \e[7m\e[94m%s\e[0m\e[0m %s%s", $msg, date('Y-m-d H:i:s'), PHP_EOL, PHP_EOL);
+
 $src_dir = $argv[1]; // source directory for test files
 $silent_run = $argv[2]; // will not open browser if present
 

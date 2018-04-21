@@ -77,18 +77,19 @@ y dev
 y prod
 ```
 
-# run JS tests
+# watch JS tests
 ```shell
 y ut:js
 ```
 
-# run PHP tests
+# watch PHP tests
 ```shell
 y ut:php
 ```
 
 # run JS & PHP coverage tests and open combined report view
 ```shell
+y ut:cov
 y test
 ```
 

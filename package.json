@@ -16,8 +16,9 @@
     "dev": "webpack --mode development --watch",
     "prod": "webpack --mode production",
     "test": "yarn karma start frontend/tests/coverage.conf.js && php test_runner.php unittests/ --silent && google-chrome tmp/index.html",
+    "ut:cov": "yarn karma start frontend/tests/coverage.conf.js && php test_runner.php unittests/ --silent && google-chrome tmp/index.html",
     "ut:js": "yarn karma start frontend/tests/karma.conf.js",
-    "ut:php": "php test_runner.php unittests/",
+    "ut:php": "yarn watch 'php test_runner.php unittests/ --silent' unittests/",
     "?": "webpack --verbose"
   },
   "devDependencies": {
@@ -33,6 +34,7 @@
     "node-sass": "4.8.3",
     "sass-loader": "7.0.1",
     "style-loader": "0.20.3",
+    "watch": "1.0.2",
     "webpack": "4.6.0",
     "webpack-cli": "2.0.14"
   }
