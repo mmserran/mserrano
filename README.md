@@ -87,7 +87,17 @@ y ut:js
 y ut:php
 ```
 
-# run JS & PHP coverage tests and open combined report view
+# run JS coverage tests
+```shell
+y ut:cov:js
+```
+
+# run PHP coverage tests
+```shell
+y ut:cov:php
+```
+
+# run JS & PHP coverage tests
 ```shell
 y ut:cov
 y test

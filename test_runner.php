@@ -1,311 +1,161 @@
 <?php
+require_once('vendor/autoload.php');
+require_once('library/php/autoloader.php');
+autoloader::library(__DIR__);
 
-class test_runner {
+$src_dir    = $argv[1]; // source directory for test files
+$is_initial = $argv[2] ?? 0; // if present, will treat as descendent
 
-    const valid_unittest   = '/^unittests(\/[a-z_]+)+\.test\.php$/'; // the convention
+if ($is_initial === 0) {
+    $arrows = style('cyan:blink', '>>>');
+    $date   = style('cyan', date('Y-m-d H:i:s (g:i:s A e)'));
+
+    echo sprintf('%1$s%1$s%2$s TEST RUN: %3$s%1$s%1$s', PHP_EOL, $arrows, $date);
+    echo sprintf("%s%s", style('cyan', '+++'), PHP_EOL);
+
+    $err_lines = array();
+}
+if (empty($src_dir) === false) {
+    if (is_dir($src_dir) === true) {
+        $pattern = sprintf('%s/*', rtrim($src_dir, '/'));
+        $files   = glob($pattern);
+        foreach ($files as $path) {
+            $cmd    = sprintf('php test_runner.php %s -d %s', $path, '2>&1');
+            $output = array();
+            exec($cmd, $output); // 0=stdin, 1=stdout, 2=stderr or check /usr/include/unistd.h
+            foreach ($output as $line) {
+                $pattern = '/test_runner.php|OK|FAILURES!!!|Test cases run:.+/';
+                if (preg_match($pattern, $line) === 0) {
+                    echo sprintf('%s %s', $line, PHP_EOL);
+                }
+                if (preg_match('/(\/[a-z_\.]+\.php) line ([0-9]+)]/', $line, $matches) !== 0) {
+                    $name        = $matches[1];
+                    $line_number = $matches[2];
+
+                    if (isset($err_lines[$name]) === false) {
+                        $err_lines[$name] = array();
+                    }
+                    $err_lines[$name][] = $line_number;
+                }
+            }
+        }
+    } else {
+        $obj = new test_file($src_dir);
+        $obj->run_test();
+    }
+}
+if ($is_initial === 0) {
+    echo sprintf("%s%s", style('cyan', '+++'), PHP_EOL);
+    foreach ($err_lines as $name => $err_lines) {
+        $o_arrows = style('light_red', '>>>');
+        $o_name   = style('bold:light_red', sprintf("%s", $name));
+        $o_lines  = style('light_red', implode("\e[0m,\e[91m", $err_lines));
+        echo sprintf("%s error on %s - line%s: %s%s", $o_arrows, $o_name, (count($err_lines) > 1 ? 's' : ''), $o_lines, PHP_EOL);
+    }
+}
+
+class test_file {
+
+    protected $ut_dir;
+    protected $path;
+    protected $name;
     //
-    const report_testname  = 'mserrano - test_runner';
-    const report_dest_html = './tmp/php-coverage-report';
-    const report_dest_xml  = './tmp/php-coverage-report/index.xml';
-    const report_browser   = 'google-chrome';
-
+    protected $ut_class;
+    protected $class;
     protected $coverage;
-    protected $error;
-    protected $test_count;
-    protected $silent;
 
-    public function __construct($silent) {
-        require_once('./vendor/autoload.php');
-        require_once('./vendor/simpletest/simpletest/autorun.php');
+    public function __construct($ut_file) {
+        list($this->ut_dir, $this->path, $this->name) = $this->dissect_convention($ut_file);
 
-        $filter           = new SebastianBergmann\CodeCoverage\Filter();
-        $this->coverage   = new SebastianBergmann\CodeCoverage\CodeCoverage(null, $filter);
-        $this->error      = null;
-        $this->test_count = 0;
-        $this->silent     = (empty($silent) == false);
+        $this->ut_class = sprintf('%s/%s/%s.test.php', $this->ut_dir, $this->path, $this->name);
+        $this->class    = sprintf('%s/%s.php', $this->path, $this->name);
 
-        $this->output_start_banner();
+        $this->coverage = new SebastianBergmann\CodeCoverage\CodeCoverage;
+        $this->coverage->filter()->addDirectoryToWhitelist($this->class);
+        $this->coverage->start($this->ut_class);
     }
 
     public function __destruct() {
         $this->coverage->stop();
 
-        if (is_null($this->error) === true) {
-            $this->create_coverage_report();
-            $this->open_report_in_browser();
-            $this->open_report_in_terminal();
-        } else {
-            $this->output_error_message();
-        }
+        $this->output_report_to_terminal();
     }
 
-    public function run_tests($arg) {
-        $dir = rtrim($arg, '/');
-
-        $this->whitelist_corresponding($dir);
-        $this->test_directory($dir);
-        $this->coverage->start(test_runner::report_testname);
-
-        if ($this->test_count === 0) {
-            $this->error = array(
-                'file'        => 'NO TESTS',
-                'msg'         => 'none or all invalid',
-                'exclamation' => $this->exclamation('kamehameha'),
-            );
-        }
+    public function run_test() {
+        require_once('./vendor/simpletest/simpletest/autorun.php');
+        require_once($this->ut_class);
+        require_once($this->class);
     }
 
-    // --- output ---
-    private function output_start_banner() {
-        $arrows = $this->style('cyan:blink', '>>>');
-        $date   = $this->style('cyan', date('Y-m-d H:i:s (g:i:s A e)'));
-
-        echo sprintf("%s%s%s TEST RUN: %s%s%s", PHP_EOL, PHP_EOL, $arrows, $date, PHP_EOL, PHP_EOL);
-    }
-
-    private function output_report_decorator() {
-        echo sprintf("%s%s", $this->style('cyan', '+++'), PHP_EOL);
-    }
-
-    private function output_coverage_test($info) {
-        $statements = '';
-        if ($info['statements'] !== 0) {
-            $stmt_coverage = (($info['coveredstatements'] / $info['statements']) * 100);
-            $statements    = sprintf('%.2f%%', $stmt_coverage);
-        }
-        $list_path  = explode('/', $info['file']);
-        $class_name = array_pop($list_path);
-
-        $o_path     = sprintf("%s", implode('/', $list_path));
-        $o_class    = $this->style('cyan', '/' . $class_name);
-        $o_stmt     = $this->style('blue:light_gray_bg', $statements);
-        $o_untested = '';
-        if ($info['methods'] > $info['coveredmethods'] === true) {
-            $count_missing = ($info['methods'] - $info['coveredmethods']);
-            $o_untested    = sprintf(" - %s method%s untested !!", $this->style('bold', $count_missing), ($count_missing > 1 ? 's' : ''));
-        }
-        echo sprintf('%s%s: %s%s%s', $o_path, $o_class, $o_stmt, $o_untested, PHP_EOL);
-    }
-
-    private function output_end_stats($total) {
-        $label_lines_covered = $this->style('bold', 'Total Line Coverage');
-        $lines_covered       = $this->style('blue:light_gray_bg', sprintf("%.2f%%", $total['stat']['percent']));
-        $lines_as_fration    = sprintf(" (%s/%s) lines tested", $total['covered']['lines'], $total['uncovered']['lines']);
-        $blue_dot            = $this->style('cyan', '.');
-        $count_missing       = $this->style('bold:blink', $total['stat']['missing']);
-        $blue_exclamation    = $this->style('cyan', ' !!');
-
-        $total_lines = sprintf("%s: %s%s%s", $label_lines_covered, $lines_covered, $lines_as_fration, $blue_dot);
-        if ($total['stat']['missing'] > 0) {
-            $total_methods = sprintf("%s method%s untested%s", $count_missing, ($total['stat']['missing'] > 1 ? 's' : ''), $blue_exclamation);
-        }
-        echo sprintf("%s %s%s", $total_lines, $total_methods ?? '', PHP_EOL);
-    }
-
-    private function output_error_message() {
-        $file = $this->style('light_red:inverted', $this->error['file']);
-        $deco = $this->style('light_red', '!!');
-        $msg  = $this->style('light_red', $this->error['msg']);
-
-        echo sprintf("%s %s %s %s%s%s", $deco, $file, $deco, $msg, $this->error['exclamation'], PHP_EOL);
-    }
-
-    // --- functions ---
-    protected function open_report_in_browser() {
-        if ($this->silent === false) {
-            exec(sprintf('%s tmp/php-coverage-report/index.html', test_runner::report_browser));
-        }
-    }
-
-    private function open_report_in_terminal() {
-        $xml_file = file_get_contents(test_runner::report_dest_xml);
-        $report   = simplexml_load_string($xml_file);
-
-        $this->output_report_decorator();
-        $total = array(
-            'covered'   => array('lines' => 0, 'methods' => 0),
-            'uncovered' => array('lines' => 0, 'methods' => 0),
-            'stat'      => array('percent' => 0, 'missing' => 0),
-        );
-        foreach ($report->project as $obj) {
-            foreach ($obj->file as $file_info) {
-                $info = array(
-                    'file'                => (string) $file_info->attributes()->name,
-                    'methods'             => (integer) $file_info->metrics->attributes()->methods,
-                    'coveredmethods'      => (integer) $file_info->metrics->attributes()->coveredmethods,
-                    'conditionals'        => (integer) $file_info->metrics->attributes()->conditionals,
-                    'coveredconditionals' => (integer) $file_info->metrics->attributes()->coveredconditionals,
-                    'statements'          => (integer) $file_info->metrics->attributes()->statements,
-                    'coveredstatements'   => (integer) $file_info->metrics->attributes()->coveredstatements,
-                );
-                $this->output_coverage_test($info);
-
-                $total['covered']['lines']     += $info['coveredstatements'];
-                $total['uncovered']['lines']   += $info['statements'];
-                $total['covered']['methods']   += $info['coveredmethods'];
-                $total['uncovered']['methods'] += $info['methods'];
-            }
-            $total['stat']['percent'] = (($total['covered']['lines'] / $total['uncovered']['lines']) * 100);
-            $total['stat']['missing'] = ($total['uncovered']['methods'] - $total['covered']['methods']);
-        }
-        $this->output_report_decorator();
-        $this->output_end_stats($total);
-    }
-
-    protected function create_coverage_report() {
-        $writer = new SebastianBergmann\CodeCoverage\Report\Html\Facade();
-        $writer->process($this->coverage, test_runner::report_dest_html);
-
-        $writer = new SebastianBergmann\CodeCoverage\Report\Clover();
-        $writer->process($this->coverage, test_runner::report_dest_xml);
-
-        $writer = null;
-    }
-
-    protected function whitelist_corresponding($ut_root) {
-        $is_subdir = (count(explode('/', $ut_root)) !== 1);
-        if ($is_subdir === true) {
-            $actual_dir = $this->strip_ut_dir($ut_root);
-            if (is_dir($ut_root) === false) {
-                // if file, test only that file
-                list($ut_dir, $path, $classname) = $this->dissect_convention($ut_root);
-                $actual_file = sprintf('%s/%s.php', $path, $classname);
-                $this->do_whitelist($actual_file);
-            } else {
-                // if subdir of unittests, traverse it (the actual subdir)
-                $this->traverse_directory($actual_dir, array($this, 'do_whitelist'));
-            }
-        } else {
-            // foreach subdir in unittests, traverse the actual subdir
-            $files = glob(sprintf('%s/*', $ut_root));
-            foreach ($files as $path) {
-                if (is_dir($path) === true) {
-                    $actual_dir = $this->strip_ut_dir($path);
-                    $this->traverse_directory($actual_dir, array($this, 'do_whitelist'));
-                } else {
-                    $this->do_whitelist($path); // for files at subdir root
+    public function output_report_to_terminal() {
+        $report = $this->coverage->getReport();
+        $info   = array();
+        foreach ($report as $item) {
+            $classes = $item->getClassesAndTraits();
+            foreach ($classes as $className => $class) {
+                if ($className === $this->name) {
+                    $count_missing = 0;
+                    foreach ($class['methods'] as $method_name => $method_info) {
+                        if ($method_info['coverage'] === 0) {
+                            $count_missing += 1;
+                        }
+                    }
+                    $info['missing']           = $count_missing;
+                    $info['coverage']          = $class['coverage'];
+                    $info['statements']        = $class['executableLines'];
+                    $info['coveredstatements'] = $class['executedLines'];
                 }
             }
         }
+        $this->output_coverage_test($info);
     }
 
-    protected function test_directory($dir) {
-        if (is_dir($dir) === true) {
-            $this->traverse_directory($dir, array($this, 'do_test_case'));
-        } else {
-            $this->do_test_case($dir); // single file
-        }
-    }
+    private function dissect_convention($ut_path) {
+        $info       = pathinfo($ut_path);
+        $class_name = explode('.', $info['filename'])[0];
 
-    // --- helpers ---
-    private function do_whitelist($path) {
-        $extension = pathinfo($path, PATHINFO_EXTENSION);
-        if ($extension === 'php') {
-            $list_dir = explode('/', pathinfo($path, PATHINFO_DIRNAME));
-            if (in_array('csts', $list_dir) === false) { // ignore /csts
-                $class = sprintf('./%s', $path);
-                $this->coverage->filter()->addDirectoryToWhitelist($class);
-            }
-        }
-    }
-
-    private function do_test_case($ut_filename) {
-        list($ut_dir, $path, $classname) = $this->dissect_convention($ut_filename);
-
-        $utclass = sprintf('./%s/%s/%s.test.php', $ut_dir, $path, $classname);
-        $class   = sprintf('./%s/%s.php', $path, $classname);
-
-        $continue = true;
-        $continue = $continue && (preg_match(test_runner::valid_unittest, $ut_filename, $matches));
-        $continue = $continue && (empty($matches[0]) === false); // matched the full pattern
-        $continue = $continue && (file_exists($class) === true);
-        $continue = $continue && (file_exists($utclass) === true);
-
-        if ($continue === true) {
-            require_once($class);
-            require_once($utclass);
-
-            $this->test_count += 1;
-        } else {
-            $this->error = array(
-                'file'        => $ut_filename,
-                'msg'         => 'no corresponding class found',
-                'exclamation' => $this->exclamation('flip'),
-            );
-        }
-    }
-
-    private function traverse_directory($dir, $function) {
-        $files = glob(sprintf('%s/*', $dir));
-        foreach ($files as $path) {
-            if (is_dir($path) === true) {
-                $this->traverse_directory($path, $function);
-            } else {
-                call_user_func($function, $path);
-            }
-        }
-    }
-
-    private function strip_ut_dir($path) {
-        $list_path = explode('/', $path);
-        array_shift($list_path);
-
-        return sprintf('%s', implode('/', $list_path));
-    }
-
-    private function dissect_convention($ut_filename) {
-        $path      = explode('.', $ut_filename)[0];
-        $list_path = explode('/', $path);
+        $list_path = explode('/', $info['dirname']);
         $ut_dir    = array_shift($list_path);
-        $classname = array_pop($list_path);
 
-        return array($ut_dir, join('/', $list_path), $classname);
+        return array($ut_dir, join('/', $list_path), $class_name);
     }
 
-    private function exclamation($type) {
-        $dot_dot_dot = $this->style('light_red', '...');
-        $guy         = $this->style('bold', '(╯°□°）╯');
-        $swoosh      = array(
-            'flip'       => $this->style('light_cyan:blink', '︵'),
-            'kamehameha' => $this->style('light_cyan:blink', '=====)'),
-        );
-        $table       = $this->style('yellow', '┻━┻');
-
-        return sprintf("%s %s%s %s", $dot_dot_dot, $guy, $swoosh[$type], $table);
-    }
-
-    private function style($rules, $string) {
-        $list_rule          = explode(':', $rules);
-        $common_color_codes = array(
-            'bold'          => '1',
-            'blink'         => '5',
-            'inverted'      => '7',
-            //
-            'yellow'        => '33',
-            'blue'          => '34',
-            'cyan'          => '36',
-            'light_red'     => '91',
-            'light_cyan'    => '96',
-            //
-            'light_gray_bg' => '47',
-        );
-
-        $return = "";
-        $tail   = "";
-        foreach ($list_rule as $rule) {
-            if (isset($common_color_codes[$rule]) === true) {
-                $return .= sprintf("\e[%sm", $common_color_codes[$rule]);
-                $tail   .= "\e[0m";
-            }
+    private function output_coverage_test($info) {
+        $o_path  = style('', sprintf('/%s/%s', $this->ut_dir, $this->path));
+        $o_class = style('cyan', '/' . sprintf('%s.test.php', $this->name));
+        $o_stmt  = style('blue:light_gray_bg', sprintf('%.2f%%', $info['coverage']));
+        if ($info['missing'] > 0) {
+            $o_untested = sprintf(" - %s method%s untested !!", style('bold', $info['missing']), ($info['missing'] > 1 ? 's' : ''));
         }
-        return sprintf("%s%s%s", $return, $string, $tail);
+        echo sprintf('%s%s: %s%s%s', $o_path, $o_class, $o_stmt, $o_untested ?? '', PHP_EOL);
     }
 
 }
 
-// --- run it ---
-$src_dir    = $argv[1]; // source directory for test files
-$silent_run = $argv[2]; // will not open browser if present
+// --- helpers ---
+function style($rules, $string) {
+    $list_rule          = explode(':', $rules);
+    $common_color_codes = array(
+        'bold'          => '1',
+        'blink'         => '5',
+        'inverted'      => '7',
+        //
+        'yellow'        => '33',
+        'blue'          => '34',
+        'cyan'          => '36',
+        'light_red'     => '91',
+        'light_cyan'    => '96',
+        //
+        'light_gray_bg' => '47',
+    );
 
-$runner = new test_runner($silent_run);
-$runner->run_tests($src_dir);
+    $return = "";
+    $tail   = "";
+    foreach ($list_rule as $rule) {
+        if (isset($common_color_codes[$rule]) === true) {
+            $return .= sprintf("\e[%sm", $common_color_codes[$rule]);
+            $tail   .= "\e[0m";
+        }
+    }
+    return sprintf("%s%s%s", $return, $string, $tail);
+}
