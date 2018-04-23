@@ -6,42 +6,28 @@ autoloader::library(__DIR__);
 $src_dir    = $argv[1]; // source directory for test files
 $is_initial = $argv[2] ?? 0; // if present, will treat as descendent
 
+$err_lines = array();
 if ($is_initial === 0) {
     $arrows = style('cyan:blink', '>>>');
     $date   = style('cyan', date('Y-m-d H:i:s (g:i:s A e)'));
 
     echo sprintf('%1$s%1$s%2$s TEST RUN: %3$s%1$s%1$s', PHP_EOL, $arrows, $date);
     echo sprintf("%s%s", style('cyan', '+++'), PHP_EOL);
-
-    $err_lines = array();
 }
 if (empty($src_dir) === false) {
     if (is_dir($src_dir) === true) {
         $pattern = sprintf('%s/*', rtrim($src_dir, '/'));
         $files   = glob($pattern);
         foreach ($files as $path) {
-            $cmd    = sprintf('php test_runner.php %s -d %s', $path, '2>&1');
-            $output = array();
-            exec($cmd, $output); // 0=stdin, 1=stdout, 2=stderr or check /usr/include/unistd.h
-            foreach ($output as $line) {
-                $pattern = '/test_runner.php|OK|FAILURES!!!|Test cases run:.+/';
-                if (preg_match($pattern, $line) === 0) {
-                    echo sprintf('%s %s', $line, PHP_EOL);
-                }
-                if (preg_match('/(\/[a-z_\.]+\.php) line ([0-9]+)]/', $line, $matches) !== 0) {
-                    $name        = $matches[1];
-                    $line_number = $matches[2];
-
-                    if (isset($err_lines[$name]) === false) {
-                        $err_lines[$name] = array();
-                    }
-                    $err_lines[$name][] = $line_number;
-                }
-            }
+            do_command(sprintf('php test_runner.php %s -d %s', $path, '2>&1'));
         }
     } else {
-        $obj = new test_file($src_dir);
-        $obj->run_test();
+        if ($is_initial === 0) {
+            do_command(sprintf('php test_runner.php %s -d %s', $src_dir, '2>&1'));
+        } else {
+            $obj = new test_file($src_dir);
+            $obj->run_test();
+        }
     }
 }
 if ($is_initial === 0) {
@@ -133,6 +119,26 @@ class test_file {
 }
 
 // --- helpers ---
+function do_command($cmd) {
+    $output = array();
+    exec($cmd, $output); // 0=stdin, 1=stdout, 2=stderr or check /usr/include/unistd.h
+    foreach ($output as $line) {
+        $pattern = '/test_runner.php|OK|FAILURES!!!|Test cases run:.+/';
+        if (preg_match($pattern, $line) === 0) {
+            echo sprintf('%s %s', $line, PHP_EOL);
+        }
+        if (preg_match('/(\/[a-z_\.]+\.php) line ([0-9]+)]/', $line, $matches) !== 0) {
+            $name        = $matches[1];
+            $line_number = $matches[2];
+
+            if (isset($err_lines[$name]) === false) {
+                $err_lines[$name] = array();
+            }
+            $err_lines[$name][] = $line_number;
+        }
+    }
+}
+
 function style($rules, $string) {
     $list_rule          = explode(':', $rules);
     $common_color_codes = array(
