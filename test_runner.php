@@ -49,12 +49,22 @@ class test_file {
     protected $ut_class;
     protected $class;
     protected $coverage;
+    protected $error;
 
     public function __construct($ut_file) {
-        list($this->ut_dir, $this->path, $this->name) = $this->dissect_convention($ut_file);
+        list($this->ut_dir, $this->path, $this->name) = dissect_convention($ut_file);
 
         $this->ut_class = sprintf('%s/%s/%s.test.php', $this->ut_dir, $this->path, $this->name);
         $this->class    = sprintf('%s/%s.php', $this->path, $this->name);
+
+        $this->error = null;
+        if (file_exists($this->class) === false) {
+            $this->error = array(
+                'file'        => $this->ut_class,
+                'msg'         => 'no corresponding class found',
+                'exclamation' => exclamation('flip'),
+            );
+        }
 
         $this->coverage = new SebastianBergmann\CodeCoverage\CodeCoverage;
         $this->coverage->filter()->addDirectoryToWhitelist($this->class);
@@ -64,16 +74,23 @@ class test_file {
     public function __destruct() {
         $this->coverage->stop();
 
-        $this->output_report_to_terminal();
+        if (is_null($this->error) === true) {
+            $this->output_report_to_terminal();
+        } else {
+            $this->output_error_message();
+        }
     }
 
     public function run_test() {
-        require_once('./vendor/simpletest/simpletest/autorun.php');
-        require_once($this->ut_class);
-        require_once($this->class);
+        if (is_null($this->error) === true) {
+            require_once('./vendor/simpletest/simpletest/autorun.php');
+            require_once($this->ut_class);
+            require_once($this->class);
+        }
     }
 
-    public function output_report_to_terminal() {
+    // --- functions ---
+    protected function output_report_to_terminal() {
         $report = $this->coverage->getReport();
         $info   = array();
         foreach ($report as $item) {
@@ -96,17 +113,7 @@ class test_file {
         $this->output_coverage_test($info);
     }
 
-    private function dissect_convention($ut_path) {
-        $info       = pathinfo($ut_path);
-        $class_name = explode('.', $info['filename'])[0];
-
-        $list_path = explode('/', $info['dirname']);
-        $ut_dir    = array_shift($list_path);
-
-        return array($ut_dir, join('/', $list_path), $class_name);
-    }
-
-    private function output_coverage_test($info) {
+    protected function output_coverage_test($info) {
         $o_path  = style('', sprintf('/%s/%s', $this->ut_dir, $this->path));
         $o_class = style('cyan', '/' . sprintf('%s.test.php', $this->name));
         $o_stmt  = style('blue:light_gray_bg', sprintf('%.2f%%', $info['coverage']));
@@ -114,6 +121,14 @@ class test_file {
             $o_untested = sprintf(" - %s method%s untested !!", style('bold', $info['missing']), ($info['missing'] > 1 ? 's' : ''));
         }
         echo sprintf('%s%s: %s%s%s', $o_path, $o_class, $o_stmt, $o_untested ?? '', PHP_EOL);
+    }
+
+    protected function output_error_message() {
+        $file = style('light_red:inverted', $this->error['file']);
+        $deco = style('light_red', '!!');
+        $msg  = style('light_red', $this->error['msg']);
+
+        echo sprintf("%s %s %s %s%s%s", $deco, $file, $deco, $msg, $this->error['exclamation'], PHP_EOL);
     }
 
 }
@@ -137,6 +152,28 @@ function do_command($cmd) {
             $err_lines[$name][] = $line_number;
         }
     }
+}
+
+function dissect_convention($ut_path) {
+    $info       = pathinfo($ut_path);
+    $class_name = explode('.', $info['filename'])[0];
+
+    $list_path = explode('/', $info['dirname']);
+    $ut_dir    = array_shift($list_path);
+
+    return array($ut_dir, join('/', $list_path), $class_name);
+}
+
+function exclamation($type) {
+    $dot_dot_dot = style('light_red', '...');
+    $guy         = style('bold', '(╯°□°）╯');
+    $swoosh      = array(
+        'flip'       => style('light_cyan:blink', '︵'),
+        'kamehameha' => style('light_cyan:blink', '=====)'),
+    );
+    $table       = style('yellow', '┻━┻');
+
+    return sprintf("%s %s%s %s", $dot_dot_dot, $guy, $swoosh[$type], $table);
 }
 
 function style($rules, $string) {
