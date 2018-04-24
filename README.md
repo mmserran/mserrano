@@ -116,4 +116,5 @@ y ?
 /tmp/**
 yarn-error.log
 /vendor/**
+/public/*.map
 ```
