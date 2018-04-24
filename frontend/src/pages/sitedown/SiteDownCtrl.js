@@ -1,30 +1,15 @@
 angular.module("lab.controllers")
         .controller("SiteDownCtrl", module.exports);
 
-module.exports = ["Const", "$scope", "$http", "Request", function (Const, $scope, $http, Request) {
+module.exports = ["Const", "Midtier", function (Const, Midtier) {
         var _this = this;
         _this.sitedown = "Sitedown 1 " + Const.Default.Date;
-        
-        var request = new Request.cached(function () {
-            var get = {}, post = {};
-            var config = {
-                method: 'GET',
-                url: '/lab_constants',
-                params: get,
-                data: post,
-            };
 
-            return $http(config);
-        });
-
-        request.call().then(function () {
-            var res = request.get_data("Default")
+        Midtier.lab_constants.call().then(function () {
+            var res = Midtier.lab_constants.get_data("Default")
             console.log(res);
         });
-        request.call().then(function () {
-            var res = request.get_data("Default")
-            console.log(res);
+        Midtier.checker.call().then(function () {
+            console.log('hello world');
         });
-
-        $scope.sitedown2 = "Sitedown 2";
     }];
