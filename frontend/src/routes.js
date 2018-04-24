@@ -3,12 +3,12 @@ angular.module("lab.routing")
             function ($routeProvider) {
                 $routeProvider.when('/', {
                     template: require('./pages/landing/landing.html'),
-                    controller: require('./pages/landing/LandingCtrl.js'),
+                    controller: 'LandingCtrl',
                     controllerAs: 'page',
                 });
                 $routeProvider.when('/sitedown', {
                     template: require('./pages/sitedown/sitedown.html'),
-                    controller: require('./pages/sitedown/SiteDownCtrl.js'),
+                    controller: 'SiteDownCtrl',
                     controllerAs: 'page',
                 });
 

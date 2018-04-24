@@ -1,11 +1,7 @@
-require('./landing.scss');
-
 angular.module('lab.controllers')
-        .controller('LandingCtrl', module.exports);
+        .controller('LandingCtrl', [function () {
+                // -- Controller -- //
+                console.log('hello, this is landing ctrl');
 
-module.exports = [function () {
-        // -- Controller -- //
-        console.log('hello, this is landing ctrl');
-
-        // -- Functions -- //
-    }];
+                // -- Functions -- //
+            }]);
