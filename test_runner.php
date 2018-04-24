@@ -1,46 +1,104 @@
 <?php
-require_once('vendor/autoload.php');
-require_once('library/php/autoloader.php');
+require_once('./vendor/autoload.php');
+require_once('./library/php/autoloader.php');
 autoloader::library(__DIR__);
 
+// --- run it ---
 $src_dir    = $argv[1]; // source directory for test files
-$is_initial = $argv[2] ?? 0; // if present, will treat as descendent
+$is_initial = $argv[2] ?? true; // will treat as descendent if present
 
-$err_lines = array();
-$lock      = new lock_file('tmp/php-coverage-report/lock.file');
-if ($is_initial === 0) {
-    $lock->get_lock(); // 'npm watch' sometimes trigger this file multiple times
-    $arrows = style('cyan:blink', '>>>');
-    $date   = style('cyan', date('Y-m-d H:i:s (g:i:s A e)'));
-
-    echo sprintf('%1$s%1$s%2$s TEST RUN: %3$s%1$s%1$s', PHP_EOL, $arrows, $date);
-    echo sprintf("%s%s", style('cyan', '+++'), PHP_EOL);
+$obj    = new test_runner($is_initial);
+$to_run = $obj->run_tests($src_dir); // recursive, will return the base case
+if (is_null($to_run) === false) {
+    $single_test = new test_file($to_run);
+    $single_test->run_test();
 }
-if (empty($src_dir) === false) {
-    if (is_dir($src_dir) === true) {
-        $pattern = sprintf('%s/*', rtrim($src_dir, '/'));
-        $files   = glob($pattern);
-        foreach ($files as $path) {
-            do_command(sprintf('php test_runner.php %s -d %s', $path, '2>&1'));
-        }
-    } else {
-        if ($is_initial === 0) {
-            do_command(sprintf('php test_runner.php %s -d %s', $src_dir, '2>&1'));
-        } else {
-            $obj = new test_file($src_dir);
-            $obj->run_test();
+
+class test_runner {
+
+    protected $is_initial;
+    protected $list_error;
+    protected $lock_file;
+
+    public function __construct($is_initial) {
+        $this->is_initial = ($is_initial === true);
+        $this->list_error = array();
+        $this->lock_file  = new lock_file('./tmp/php-coverage-report/lock.file');
+
+        if ($this->is_initial === true) {
+            $this->lock_file->get_lock();
+            $this->output_start_banner();
         }
     }
-}
-if ($is_initial === 0) {
-    echo sprintf("%s%s", style('cyan', '+++'), PHP_EOL);
-    foreach ($err_lines as $name => $err_lines) {
-        $o_arrows = style('light_red', '>>>');
-        $o_name   = style('bold:light_red', sprintf("%s", $name));
-        $o_lines  = style('light_red', implode("\e[0m,\e[91m", $err_lines));
-        echo sprintf("%s error on %s - line%s: %s%s", $o_arrows, $o_name, (count($err_lines) > 1 ? 's' : ''), $o_lines, PHP_EOL);
+
+    public function __destruct() {
+        if ($this->is_initial === true) {
+            $this->lock_file->release();
+            $this->output_end_banner();
+        }
     }
-    $lock->release();
+
+    public function run_tests($src_dir) {
+        $return = null;
+        if (empty($src_dir) === false) {
+            if (is_dir($src_dir) === true) {
+                $pattern = sprintf('%s/*', rtrim($src_dir, '/'));
+                $files   = glob($pattern);
+                foreach ($files as $path) {
+                    $this->do_command(sprintf('php test_runner.php %s -d %s', $path, '2>&1'));
+                }
+            } else {
+                if ($this->is_initial === true) {
+                    $this->do_command(sprintf('php test_runner.php %s -d %s', $src_dir, '2>&1'));
+                } else {
+                    $return = $src_dir; // base case: src_dir is file, run tests
+                }
+            }
+        }
+        return $return;
+    }
+
+    // --- functions ---
+    protected function output_start_banner() {
+
+        $arrows = style('cyan:blink', '>>>');
+        $date   = style('cyan', date('Y-m-d H:i:s (g:i:s A e)'));
+
+        echo sprintf('%1$s%1$s%1$s%2$s TEST RUN: %3$s%1$s%1$s', PHP_EOL, $arrows, $date);
+        echo sprintf("%s%s", style('cyan', '+++'), PHP_EOL);
+    }
+
+    protected function output_end_banner() {
+        echo sprintf("%s%s", style('cyan', '+++'), PHP_EOL);
+        foreach ($this->list_error as $name => $err_lines) {
+            $o_arrows = style('light_red', '>>>');
+            $o_name   = style('bold:light_red', sprintf("%s", $name));
+            $o_lines  = style('light_red', implode("\e[0m,\e[91m", $err_lines));
+            echo sprintf("%s error on %s - line%s: %s%s", $o_arrows, $o_name, (count($err_lines) > 1 ? 's' : ''), $o_lines, PHP_EOL);
+        }
+    }
+
+    // --- helpers ---
+    private function do_command($cmd) {
+        $output = array();
+        exec($cmd, $output); // 0=stdin, 1=stdout, 2=stderr or check /usr/include/unistd.h
+        foreach ($output as $line) {
+            $pattern = '/test_runner.php|OK|FAILURES!!!|Test cases run:.+/';
+            if (preg_match($pattern, $line) === 0) {
+                echo sprintf("%s %s", $line, PHP_EOL);
+            }
+            if (preg_match('/(\/[a-z_\.]+\.php) line ([0-9]+)]/', $line, $matches) !== 0) {
+                $name        = $matches[1];
+                $line_number = $matches[2];
+
+                if (isset($this->list_error[$name]) === false) {
+                    $this->list_error[$name] = array();
+                }
+                $this->list_error[$name][] = $line_number;
+            }
+        }
+    }
+
 }
 
 class lock_file {
@@ -80,7 +138,7 @@ class test_file {
     protected $error;
 
     public function __construct($ut_file) {
-        list($this->ut_dir, $this->path, $this->name) = dissect_convention($ut_file);
+        list($this->ut_dir, $this->path, $this->name) = $this->dissect_convention($ut_file);
 
         $this->ut_class = sprintf('%s/%s/%s.test.php', $this->ut_dir, $this->path, $this->name);
         $this->class    = sprintf('%s/%s.php', $this->path, $this->name);
@@ -90,7 +148,7 @@ class test_file {
             $this->error = array(
                 'file'        => $this->ut_class,
                 'msg'         => 'no corresponding class found',
-                'exclamation' => exclamation('flip'),
+                'exclamation' => $this->exclamation('flip'),
             );
         }
 
@@ -159,51 +217,32 @@ class test_file {
         echo sprintf("%s %s %s %s%s%s", $deco, $file, $deco, $msg, $this->error['exclamation'], PHP_EOL);
     }
 
-}
+    // --- helpers ---
+    private function dissect_convention($ut_path) {
+        $info       = pathinfo($ut_path);
+        $class_name = explode('.', $info['filename'])[0];
 
-// --- helpers ---
-function do_command($cmd) {
-    $output = array();
-    exec($cmd, $output); // 0=stdin, 1=stdout, 2=stderr or check /usr/include/unistd.h
-    foreach ($output as $line) {
-        $pattern = '/test_runner.php|OK|FAILURES!!!|Test cases run:.+/';
-        if (preg_match($pattern, $line) === 0) {
-            echo sprintf('%s %s', $line, PHP_EOL);
-        }
-        if (preg_match('/(\/[a-z_\.]+\.php) line ([0-9]+)]/', $line, $matches) !== 0) {
-            $name        = $matches[1];
-            $line_number = $matches[2];
+        $list_path = explode('/', $info['dirname']);
+        $ut_dir    = array_shift($list_path);
 
-            if (isset($err_lines[$name]) === false) {
-                $err_lines[$name] = array();
-            }
-            $err_lines[$name][] = $line_number;
-        }
+        return array($ut_dir, join('/', $list_path), $class_name);
     }
+
+    private function exclamation($type) {
+        $dot_dot_dot = style('light_red', '...');
+        $guy         = style('bold', '(╯°□°）╯');
+        $swoosh      = array(
+            'flip'       => style('light_cyan:blink', '︵'),
+            'kamehameha' => style('light_cyan:blink', '=====)'),
+        );
+        $table       = style('yellow', '┻━┻');
+
+        return sprintf("%s %s%s %s", $dot_dot_dot, $guy, $swoosh[$type], $table);
+    }
+
 }
 
-function dissect_convention($ut_path) {
-    $info       = pathinfo($ut_path);
-    $class_name = explode('.', $info['filename'])[0];
-
-    $list_path = explode('/', $info['dirname']);
-    $ut_dir    = array_shift($list_path);
-
-    return array($ut_dir, join('/', $list_path), $class_name);
-}
-
-function exclamation($type) {
-    $dot_dot_dot = style('light_red', '...');
-    $guy         = style('bold', '(╯°□°）╯');
-    $swoosh      = array(
-        'flip'       => style('light_cyan:blink', '︵'),
-        'kamehameha' => style('light_cyan:blink', '=====)'),
-    );
-    $table       = style('yellow', '┻━┻');
-
-    return sprintf("%s %s%s %s", $dot_dot_dot, $guy, $swoosh[$type], $table);
-}
-
+// --- utility ---
 function style($rules, $string) {
     $list_rule          = explode(':', $rules);
     $common_color_codes = array(
