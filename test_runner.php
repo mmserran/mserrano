@@ -7,7 +7,9 @@ $src_dir    = $argv[1]; // source directory for test files
 $is_initial = $argv[2] ?? 0; // if present, will treat as descendent
 
 $err_lines = array();
+$lock      = new lock_file('tmp/php-coverage-report/lock.file');
 if ($is_initial === 0) {
+    $lock->get_lock(); // 'npm watch' sometimes trigger this file multiple times
     $arrows = style('cyan:blink', '>>>');
     $date   = style('cyan', date('Y-m-d H:i:s (g:i:s A e)'));
 
@@ -38,6 +40,32 @@ if ($is_initial === 0) {
         $o_lines  = style('light_red', implode("\e[0m,\e[91m", $err_lines));
         echo sprintf("%s error on %s - line%s: %s%s", $o_arrows, $o_name, (count($err_lines) > 1 ? 's' : ''), $o_lines, PHP_EOL);
     }
+    $lock->release();
+}
+
+class lock_file {
+
+    protected $filename;
+    protected $lock;
+
+    public function __construct($filename) {
+        $this->filename = $filename;
+    }
+
+    public function get_lock() {
+        touch($this->filename);
+        $this->lock = fopen($this->filename, 'r+');
+        flock($this->lock, LOCK_EX);
+    }
+
+    public function release() {
+        flock($this->lock, LOCK_UN);
+        fclose($this->lock);
+        if (file_exists($this->filename) === true) {
+            unlink($this->filename);
+        }
+    }
+
 }
 
 class test_file {
