@@ -1,5 +1,5 @@
 angular.module("lab.controllers")
-        .controller("SiteDownCtrl", ["Const", "Midtier", function (Const, Midtier) {
+        .controller("SiteDownCtrl", function (Const, Midtier) {
                 var _this = this;
                 _this.sitedown = "Sitedown 1 " + Const.Default.Date;
 
@@ -10,4 +10,4 @@ angular.module("lab.controllers")
                 Midtier.checker.call().then(function () {
                     console.log('hello world');
                 });
-            }]);
+            });

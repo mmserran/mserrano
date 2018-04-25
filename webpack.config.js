@@ -16,8 +16,9 @@ module.exports = function (env, argv) {
         module: {
             rules: [
                 {test: /\.(scss)$/, loader: ExtractTextPlugin.extract(['css-loader', 'sass-loader'])},
-                {test: /\.(html)$/, loader: 'html-loader'}
-            ]
+                {test: /\.(html)$/, loader: 'html-loader'},
+                {test: /.*\.js$/, loader: 'ng-annotate-loader'},
+            ],
         },
         plugins: [
             new ExtractTextPlugin('./public/lab.mserrano.css'),
