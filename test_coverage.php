@@ -1,4 +1,6 @@
 <?php
+require_once('./library/php/autoloader.php');
+autoloader::library(__DIR__);
 
 // --- run it ---
 $src_dir    = $argv[1]; // source directory for test files
@@ -57,21 +59,21 @@ class test_runner {
             $this->error = array(
                 'file'        => 'NO TESTS',
                 'msg'         => 'none or all invalid',
-                'exclamation' => $this->exclamation('kamehameha'),
+                'exclamation' => helper_bash::exclamation('kamehameha'),
             );
         }
     }
 
     // --- output ---
     private function output_start_banner() {
-        $arrows = $this->style('cyan:blink', '>>>');
-        $date   = $this->style('cyan', date('Y-m-d H:i:s (g:i:s A e)'));
+        $arrows = helper_bash::style('cyan:blink', '>>>');
+        $date   = helper_bash::style('cyan', date('Y-m-d H:i:s (g:i:s A e)'));
 
         echo sprintf("%s%s%s TEST RUN: %s%s%s", PHP_EOL, PHP_EOL, $arrows, $date, PHP_EOL, PHP_EOL);
     }
 
     private function output_report_decorator() {
-        echo sprintf("%s%s", $this->style('cyan', '+++'), PHP_EOL);
+        echo sprintf("%s%s", helper_bash::style('cyan', '+++'), PHP_EOL);
     }
 
     private function output_coverage_test($info) {
@@ -84,23 +86,23 @@ class test_runner {
         $class_name = array_pop($list_path);
 
         $o_path     = sprintf("%s", implode('/', $list_path));
-        $o_class    = $this->style('cyan', '/' . $class_name);
-        $o_stmt     = $this->style('blue:light_gray_bg', $statements);
+        $o_class    = helper_bash::style('cyan', '/' . $class_name);
+        $o_stmt     = helper_bash::style('blue:light_gray_bg', $statements);
         $o_untested = '';
         if ($info['methods'] > $info['coveredmethods'] === true) {
             $count_missing = ($info['methods'] - $info['coveredmethods']);
-            $o_untested    = sprintf(" - %s method%s untested !!", $this->style('bold', $count_missing), ($count_missing > 1 ? 's' : ''));
+            $o_untested    = sprintf(" - %s method%s untested !!", helper_bash::style('bold', $count_missing), ($count_missing > 1 ? 's' : ''));
         }
         echo sprintf('%s%s: %s%s%s', $o_path, $o_class, $o_stmt, $o_untested, PHP_EOL);
     }
 
     private function output_end_stats($total) {
-        $label_lines_covered = $this->style('bold', 'Total Line Coverage');
-        $lines_covered       = $this->style('blue:light_gray_bg', sprintf("%.2f%%", $total['stat']['percent']));
+        $label_lines_covered = helper_bash::style('bold', 'Total Line Coverage');
+        $lines_covered       = helper_bash::style('blue:light_gray_bg', sprintf("%.2f%%", $total['stat']['percent']));
         $lines_as_fration    = sprintf(" (%s/%s) lines tested", $total['covered']['lines'], $total['uncovered']['lines']);
-        $blue_dot            = $this->style('cyan', '.');
-        $count_missing       = $this->style('bold', $total['stat']['missing']);
-        $blue_exclamation    = $this->style('cyan', ' !!');
+        $blue_dot            = helper_bash::style('cyan', '.');
+        $count_missing       = helper_bash::style('bold', $total['stat']['missing']);
+        $blue_exclamation    = helper_bash::style('cyan', ' !!');
 
         $total_lines = sprintf("%s: %s%s%s", $label_lines_covered, $lines_covered, $lines_as_fration, $blue_dot);
         if ($total['stat']['missing'] > 0) {
@@ -110,11 +112,11 @@ class test_runner {
     }
 
     private function output_error_message() {
-        $file = $this->style('light_red:inverted', $this->error['file']);
-        $deco = $this->style('light_red', '!!');
-        $msg  = $this->style('light_red', $this->error['msg']);
+        $file = helper_bash::style('light_red:inverted', $this->error['file']);
+        $deco = helper_bash::style('light_red', '!!');
+        $msg  = helper_bash::style('light_red', $this->error['msg']);
 
-        echo sprintf("%s %s %s %s%s%s", $deco, $file, $deco, $msg, $this->error['exclamation'], PHP_EOL);
+        echo sprintf("%s%s %s %s %s%s%s", PHP_EOL, $deco, $file, $deco, $msg, $this->error['exclamation'], PHP_EOL);
     }
 
     // --- functions ---
@@ -229,7 +231,6 @@ class test_runner {
         $continue = $continue && (file_exists($utclass) === true);
 
         if ($continue === true) {
-            require_once($class);
             require_once($utclass);
 
             $this->test_count += 1;
@@ -237,7 +238,7 @@ class test_runner {
             $this->error = array(
                 'file'        => $ut_filename,
                 'msg'         => 'no corresponding class found',
-                'exclamation' => $this->exclamation('flip'),
+                'exclamation' => helper_bash::exclamation('flip'),
             );
         }
     }
@@ -270,42 +271,15 @@ class test_runner {
     }
 
     private function exclamation($type) {
-        $dot_dot_dot = $this->style('light_red', '...');
-        $guy         = $this->style('bold', '(╯°□°）╯');
+        $dot_dot_dot = helper_bash::style('light_red', '...');
+        $guy         = helper_bash::style('bold', '(╯°□°）╯');
         $swoosh      = array(
-            'flip'       => $this->style('light_cyan:blink', '︵'),
-            'kamehameha' => $this->style('light_cyan:blink', '=====)'),
+            'flip'       => helper_bash::style('light_cyan:blink', '︵'),
+            'kamehameha' => helper_bash::style('light_cyan:blink', '=====)'),
         );
-        $table       = $this->style('yellow', '┻━┻');
+        $table       = helper_bash::style('yellow', '┻━┻');
 
         return sprintf("%s %s%s %s", $dot_dot_dot, $guy, $swoosh[$type], $table);
-    }
-
-    private function style($rules, $string) {
-        $list_rule          = explode(':', $rules);
-        $common_color_codes = array(
-            'bold'          => '1',
-            'blink'         => '5',
-            'inverted'      => '7',
-            //
-            'yellow'        => '33',
-            'blue'          => '34',
-            'cyan'          => '36',
-            'light_red'     => '91',
-            'light_cyan'    => '96',
-            //
-            'light_gray_bg' => '47',
-        );
-
-        $return = "";
-        $tail   = "";
-        foreach ($list_rule as $rule) {
-            if (isset($common_color_codes[$rule]) === true) {
-                $return .= sprintf("\e[%sm", $common_color_codes[$rule]);
-                $tail   .= "\e[0m";
-            }
-        }
-        return sprintf("%s%s%s", $return, $string, $tail);
     }
 
 }

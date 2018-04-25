@@ -61,19 +61,19 @@ class test_runner {
     // --- functions ---
     protected function output_start_banner() {
 
-        $arrows = style('cyan:blink', '>>>');
-        $date   = style('cyan', date('Y-m-d H:i:s (g:i:s A e)'));
+        $arrows = helper_bash::style('cyan:blink', '>>>');
+        $date   = helper_bash::style('cyan', date('Y-m-d H:i:s (g:i:s A e)'));
 
         echo sprintf('%1$s%1$s%1$s%2$s TEST RUN: %3$s%1$s%1$s', PHP_EOL, $arrows, $date);
-        echo sprintf("%s%s", style('cyan', '+++'), PHP_EOL);
+        echo sprintf("%s%s", helper_bash::style('cyan', '+++'), PHP_EOL);
     }
 
     protected function output_end_banner() {
-        echo sprintf("%s%s", style('cyan', '+++'), PHP_EOL);
+        echo sprintf("%s%s", helper_bash::style('cyan', '+++'), PHP_EOL);
         foreach ($this->list_error as $name => $err_lines) {
-            $o_arrows = style('light_red', '>>>');
-            $o_name   = style('bold:light_red', sprintf("%s", $name));
-            $o_lines  = style('light_red', implode("\e[0m,\e[91m", $err_lines));
+            $o_arrows = helper_bash::style('light_red', '>>>');
+            $o_name   = helper_bash::style('bold:light_red', sprintf("%s", $name));
+            $o_lines  = helper_bash::style('light_red', implode("\e[0m,\e[91m", $err_lines));
             echo sprintf("%s error on %s - line%s: %s%s", $o_arrows, $o_name, (count($err_lines) > 1 ? 's' : ''), $o_lines, PHP_EOL);
         }
     }
@@ -148,7 +148,7 @@ class test_file {
             $this->error = array(
                 'file'        => $this->ut_class,
                 'msg'         => 'no corresponding class found',
-                'exclamation' => $this->exclamation('flip'),
+                'exclamation' => helper_bash::exclamation('flip'),
             );
         }
 
@@ -200,19 +200,19 @@ class test_file {
     }
 
     protected function output_coverage_test($info) {
-        $o_path  = style('', sprintf('/%s/%s', $this->ut_dir, $this->path));
-        $o_class = style('cyan', '/' . sprintf('%s.test.php', $this->name));
-        $o_stmt  = style('blue:light_gray_bg', sprintf('%.2f%%', $info['coverage']));
+        $o_path  = helper_bash::style('', sprintf('/%s/%s', $this->ut_dir, $this->path));
+        $o_class = helper_bash::style('cyan', '/' . sprintf('%s.test.php', $this->name));
+        $o_stmt  = helper_bash::style('blue:light_gray_bg', sprintf('%.2f%%', $info['coverage']));
         if ($info['missing'] > 0) {
-            $o_untested = sprintf(" - %s method%s untested !!", style('bold', $info['missing']), ($info['missing'] > 1 ? 's' : ''));
+            $o_untested = sprintf(" - %s method%s untested !!", helper_bash::style('bold', $info['missing']), ($info['missing'] > 1 ? 's' : ''));
         }
         echo sprintf('%s%s: %s%s%s', $o_path, $o_class, $o_stmt, $o_untested ?? '', PHP_EOL);
     }
 
     protected function output_error_message() {
-        $file = style('light_red:inverted', $this->error['file']);
-        $deco = style('light_red', '!!');
-        $msg  = style('light_red', $this->error['msg']);
+        $file = helper_bash::style('light_red:inverted', $this->error['file']);
+        $deco = helper_bash::style('light_red', '!!');
+        $msg  = helper_bash::style('light_red', $this->error['msg']);
 
         echo sprintf("%s %s %s %s%s%s", $deco, $file, $deco, $msg, $this->error['exclamation'], PHP_EOL);
     }
@@ -228,44 +228,4 @@ class test_file {
         return array($ut_dir, join('/', $list_path), $class_name);
     }
 
-    private function exclamation($type) {
-        $dot_dot_dot = style('light_red', '...');
-        $guy         = style('bold', '(╯°□°）╯');
-        $swoosh      = array(
-            'flip'       => style('light_cyan:blink', '︵'),
-            'kamehameha' => style('light_cyan:blink', '=====)'),
-        );
-        $table       = style('yellow', '┻━┻');
-
-        return sprintf("%s %s%s %s", $dot_dot_dot, $guy, $swoosh[$type], $table);
-    }
-
-}
-
-// --- utility ---
-function style($rules, $string) {
-    $list_rule          = explode(':', $rules);
-    $common_color_codes = array(
-        'bold'          => '1',
-        'blink'         => '5',
-        'inverted'      => '7',
-        //
-        'yellow'        => '33',
-        'blue'          => '34',
-        'cyan'          => '36',
-        'light_red'     => '91',
-        'light_cyan'    => '96',
-        //
-        'light_gray_bg' => '47',
-    );
-
-    $return = "";
-    $tail   = "";
-    foreach ($list_rule as $rule) {
-        if (isset($common_color_codes[$rule]) === true) {
-            $return .= sprintf("\e[%sm", $common_color_codes[$rule]);
-            $tail   .= "\e[0m";
-        }
-    }
-    return sprintf("%s%s%s", $return, $string, $tail);
 }
