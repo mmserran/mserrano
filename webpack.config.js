@@ -17,7 +17,7 @@ module.exports = function (env, argv) {
             rules: [
                 {test: /\.(scss)$/, loader: ExtractTextPlugin.extract(['css-loader', 'sass-loader'])},
                 {test: /\.(html)$/, loader: 'html-loader'},
-                {test: /.*\.js$/, loader: 'ng-annotate-loader'},
+                {test: /\.(js)$/, loader: 'ng-annotate-loader'},
             ],
         },
         plugins: [
@@ -26,7 +26,7 @@ module.exports = function (env, argv) {
     };
 
     if (production === false) {
-        config.devtool = 'source-map';
+        config.devtool = 'inline-source-map';
     }
     return config;
 };

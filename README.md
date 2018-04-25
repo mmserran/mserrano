@@ -79,27 +79,26 @@ y prod
 
 # watch JS tests
 ```shell
-y ut:js
+y js
 ```
 
 # watch PHP tests
 ```shell
-y ut:php
+y php
 ```
 
 # run JS coverage tests
 ```shell
-y ut:cov:js
+y js:cov
 ```
 
 # run PHP coverage tests
 ```shell
-y ut:cov:php
+y php:cov
 ```
 
 # run JS & PHP coverage tests
 ```shell
-y ut:cov
 y test
 ```
 

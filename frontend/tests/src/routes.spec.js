@@ -1,6 +1,6 @@
-"use strict";
-
 describe("!! routes.js !! ", function () {
+    "use strict";
+
     var $route, $controller;
     beforeEach(function () {
         module("lab");
@@ -11,13 +11,13 @@ describe("!! routes.js !! ", function () {
         });
     });
 
-    // setup test case
+    // setUp
     var rnd;
     beforeEach(function () {
         rnd = helper.number.rand();
     });
 
-    //teardown
+    // tearDown
     var obj;
     afterEach(function () {
         obj = null;
@@ -44,7 +44,7 @@ describe("!! routes.js !! ", function () {
             });
 
             it("invalid controller", function () {
-                expect(obj.controller[obj.controller.length - 1]).toEqual(jasmine.any(Function));
+                expect(obj.controller).toEqual(jasmine.any(String));
             });
         });
 
@@ -64,7 +64,7 @@ describe("!! routes.js !! ", function () {
             });
 
             it("invalid controller", function () {
-                expect(obj.controller[obj.controller.length - 1]).toEqual(jasmine.any(Function));
+                expect(obj.controller).toEqual(jasmine.any(String));
             });
         });
     });

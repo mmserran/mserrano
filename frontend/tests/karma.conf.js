@@ -1,15 +1,16 @@
 module.exports = function (config) {
     config.set({
+        autoWatch: true,
         basePath: '../..',
-        frameworks: ['jasmine'],
+        browsers: ['PhantomJS'],
         files: [
             'public/vendor.mserrano.js',
             'library/javascript/angular-mocks.js',
             'public/lab.mserrano.js',
             'frontend/tests/helpers/helpers.*.js',
-            'frontend/tests/src/*.spec.js',
+            'frontend/tests/src/**/*.spec.js',
         ],
-        browsers: ['PhantomJS'],
-        reporters: ['dots'],
+        frameworks: ['jasmine'],
+        reporters: ['dots']
     });
 };

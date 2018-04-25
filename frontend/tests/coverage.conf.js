@@ -7,10 +7,10 @@ module.exports = function (config) {
         files: [
             'public/vendor.mserrano.js',
             'library/javascript/angular-mocks.js',
-            'frontend/src/*.js',
+            'frontend/src/**/*.js',
             'public/lab.mserrano.js',
             'frontend/tests/helpers/helpers.*.js',
-            'frontend/tests/src/*.spec.js',
+            'frontend/tests/src/**/*.spec.js',
         ],
         reporters: ['progress', 'coverage'],
         preprocessors: {

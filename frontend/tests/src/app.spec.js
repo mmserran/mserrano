@@ -1,12 +1,11 @@
-"use strict";
-
 describe("!! app.js !! ", function () {
-    // bootstrap angular
+    "use strict";
+
     beforeEach(function () {
-        module("lab");
+        module("lab"); // bootstrap angular
     });
 
-    // setup test case
+    // setUp
     var rnd;
     beforeEach(function () {
         rnd = helper.number.rand();
