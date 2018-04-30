@@ -15,9 +15,9 @@ module.exports = function (env, argv) {
         },
         module: {
             rules: [
-                {test: /\.(scss)$/, loader: ExtractTextPlugin.extract(['css-loader', 'sass-loader'])},
-                {test: /\.(html)$/, loader: 'html-loader'},
                 {test: /\.(js)$/, loader: 'ng-annotate-loader'},
+                {test: /\.(html)$/, loader: 'angular-templatecache-loader?module=lab'},
+                {test: /\.(scss)$/, loader: ExtractTextPlugin.extract(['css-loader', 'sass-loader'])},
             ],
         },
         plugins: [

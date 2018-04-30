@@ -1,5 +1,5 @@
 // test for javascript source files
-var require_all = require.context('../src/', true, /.+\.js$/);
+var require_all = require.context('../src/', true, /.+\.(js|html)$/);
 var list_file = require_all.keys();
 
 // load our app
