@@ -28,6 +28,8 @@ describe("!! routes.js !! ", function () {
     var obj;
     afterEach(function () {
         obj = null;
+
+        helper.test.tearDown();
     });
 
     it("should exist", function () {

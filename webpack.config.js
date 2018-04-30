@@ -3,7 +3,7 @@ const webpack = require('webpack');
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 
 module.exports = function (env, argv) {
-    var app_name = 'lab';
+    var app_name = 'lab'; //APP_NAME
     var production = (argv.mode === 'production');
     var config = {
         entry: {},
