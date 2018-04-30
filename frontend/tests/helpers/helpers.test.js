@@ -4,6 +4,7 @@
     var app_name = "lab"; //APP_NAME
 
     window.helper = (window.helper || {});
+    window.helper.Const = null;
     window.helper.test = (window.helper.test || {});
 
     window.helper.test.setUp = test_setUp;
@@ -19,6 +20,7 @@
         fill_const(_const, "Infrastructure.Fail", rand_str);
 
         _const = angular.merge({}, _const, override);
+        window.helper.Const = _const;
 
         module(app_name, function ($provide) {
             $provide.value("Const", _const);

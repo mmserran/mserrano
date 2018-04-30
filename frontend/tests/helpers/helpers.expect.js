@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 (function () {
     window.helper = (window.helper || {});
@@ -14,7 +14,7 @@
         expect(obj).toBeDefined();
     }
     function expect_in_array(needle, haystack) {
-        var err_msg = 'expected ' + angular.toJson(needle) + ' in ' + angular.toJson(haystack);
+        var err_msg = "expected " + angular.toJson(needle) + " in " + angular.toJson(haystack);
         expect(haystack.indexOf(needle) === -1).toBe(false, err_msg);
     }
 })();
