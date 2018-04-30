@@ -1,11 +1,12 @@
 describe("!! app.js !! ", function () {
     "use strict";
 
+    // setUp - constants
     beforeEach(function () {
-        module("lab"); // bootstrap angular
+        helper.test.setUp({});
     });
 
-    // setUp
+    // setUp - test case
     var rnd;
     beforeEach(function () {
         rnd = helper.number.rand();
@@ -27,37 +28,47 @@ describe("!! app.js !! ", function () {
         });
 
         describe("lab.routing", function () {
-            it("is not in the dependency list", function () {
+            it("should be in dependency list", function () {
                 helper.expect.in_array("lab.routing", obj.requires);
             });
 
-            it("not instantiated", function () {
+            it("should be instantiated", function () {
                 helper.expect.module_to_exist("lab.routing");
             });
 
-            it("is missing ngRoute", function () {
+            it("should use ngRoute", function () {
                 obj = angular.module("lab.routing");
                 helper.expect.in_array("ngRoute", obj.requires);
             });
         });
 
         describe("lab.constants", function () {
-            it("is not in the dependency list", function () {
+            it("should be in dependency list", function () {
                 helper.expect.in_array("lab.constants", obj.requires);
             });
 
-            it("not instantiated", function () {
+            it("should be instantiated", function () {
                 helper.expect.module_to_exist("lab.constants");
             });
         });
 
         describe("lab.controllers", function () {
-            it("is not in the dependency list", function () {
+            it("should be in dependency list", function () {
                 helper.expect.in_array("lab.controllers", obj.requires);
             });
 
-            it("not instantiated", function () {
+            it("should be instantiated", function () {
                 helper.expect.module_to_exist("lab.controllers");
+            });
+        });
+
+        describe("lab.services", function () {
+            it("should be in dependency list", function () {
+                helper.expect.in_array("lab.services", obj.requires);
+            });
+
+            it("should be instantiated", function () {
+                helper.expect.module_to_exist("lab.services");
             });
         });
     });

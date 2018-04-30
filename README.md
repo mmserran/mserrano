@@ -115,5 +115,5 @@ y ?
 /tmp/**
 yarn-error.log
 /vendor/**
-/public/*.map
+/public/template.mserrano.js
 ```

@@ -1,17 +1,24 @@
 describe("!! routes.js !! ", function () {
     "use strict";
 
-    var $route, $controller;
+    // setUp - constants
     beforeEach(function () {
-        module("lab");
+        helper.test.setUp({});
+    });
 
-        inject(function (_$route_, _$controller_) {
+    // setUp - services
+    var $rootScope, $route, $controller, $templateCache, $location;
+    beforeEach(function () {
+        inject(function (_$rootScope_, _$route_, _$controller_, _$templateCache_, _$location_) {
+            $rootScope = _$rootScope_;
             $route = _$route_;
             $controller = _$controller_;
+            $templateCache = _$templateCache_;
+            $location = _$location_;
         });
     });
 
-    // setUp
+    // setUp - test case
     var rnd;
     beforeEach(function () {
         rnd = helper.number.rand();
@@ -27,44 +34,69 @@ describe("!! routes.js !! ", function () {
         expect($route).toBeDefined();
     });
 
-    describe("routes", function () {
+    describe("route", function () {
         describe("landing", function () {
-            var path = '/';
+            var path = "/";
             beforeEach(function () {
                 obj = $route.routes[path];
             });
 
-            it("is not defined", function () {
-                var err_msg = "Expected route \'" + path + "\' to be defined";
+            it("should be defined", function () {
+                var err_msg = "Expected route \"" + path + "\" to be defined";
                 expect(obj).toBeDefined(err_msg);
+
+                if (angular.isDefined(obj) === true) {
+                    $location.path(path);
+                    expect($route.current).toBeUndefined();
+                    $rootScope.$digest();
+                    expect($route.current.controller).toEqual("LandingCtrl");
+                }
             });
 
-            it("invalid template", function () {
-                expect(obj.template).toEqual(jasmine.any(String));
+            it("should have valid templateUrl", function () {
+                var res = $templateCache.get(obj.templateUrl);
+                expect(res).toEqual(jasmine.any(String));
             });
 
-            it("invalid controller", function () {
+            it("should have valid controller", function () {
                 expect(obj.controller).toEqual(jasmine.any(String));
             });
         });
 
         describe("sitedown", function () {
-            var path = '/sitedown';
+            var path = "/sitedown";
             beforeEach(function () {
                 obj = $route.routes[path];
             });
 
-            it("is not defined", function () {
-                var err_msg = "Expected route \'" + path + "\' to be defined";
+            it("should be defined", function () {
+                var err_msg = "Expected route \"" + path + "\" to be defined";
                 expect(obj).toBeDefined(err_msg);
+
+                if (angular.isDefined(obj) === true) {
+                    $location.path(path);
+                    expect($route.current).toBeUndefined();
+                    $rootScope.$digest();
+                    expect($route.current.controller).toEqual("SiteDownCtrl");
+                }
             });
 
-            it("invalid template", function () {
-                expect(obj.template).toEqual(jasmine.any(String));
+            it("should have valid templateUrl", function () {
+                var res = $templateCache.get(obj.templateUrl);
+                expect(res).toEqual(jasmine.any(String));
             });
 
-            it("invalid controller", function () {
+            it("should have valid controller", function () {
                 expect(obj.controller).toEqual(jasmine.any(String));
+            });
+        });
+
+        describe("otherwise", function () {
+            it("should redirect to Landing page", function () {
+                $location.path("/unrecognized-page-DNE");
+                expect($route.current).toBeUndefined();
+                $rootScope.$digest();
+                expect($route.current.controller).toEqual("LandingCtrl");
             });
         });
     });
