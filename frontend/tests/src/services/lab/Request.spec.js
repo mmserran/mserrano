@@ -1,6 +1,13 @@
 describe("!! Request.js !! ", function () {
     "use strict";
 
+    // tearDown
+    var obj;
+    afterEach(function () {
+        helper.test.tearDown();
+        obj = null;
+    });
+
     // setUp - constants
     beforeEach(function () {
         helper.test.setUp({});
@@ -17,22 +24,24 @@ describe("!! Request.js !! ", function () {
         });
     });
 
+    // setUp - test obj (Service)
+    function get_test_obj() {
+        var _return;
+        inject(function (_Request_) {
+            _return = _Request_;
+        });
+        return _return;
+    }
+
     // setUp - test case
     var rnd;
     beforeEach(function () {
         rnd = helper.number.rand();
     });
 
-    // tearDown
-    var obj;
-    afterEach(function () {
-        helper.test.tearDown();
-        obj = null;
-    });
-
     // Service
     it("should exist", function () {
-        obj = Request;
+        obj = get_test_obj();
         expect(obj).toBeDefined();
     });
 
