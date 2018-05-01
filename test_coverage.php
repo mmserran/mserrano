@@ -1,31 +1,42 @@
 <?php
-require_once('./library/php/autoloader.php');
-autoloader::library(__DIR__);
+$root = __DIR__;
+require_once($root . '/library/php/autoloader.php');
+autoloader::library($root);
 
 // --- run it ---
+ob_start();
+
 $src_dir    = $argv[1]; // source directory for test files
 $silent_run = ($argv[2] ?? ''); // will not open browser if present
+$blacklist  = ['silent_autorun.php', 'test_runner.php', 'test_coverage.php'];
 
-$runner = new test_runner($silent_run);
+$runner = new test_runner($root, $blacklist, $silent_run);
 $runner->run_tests($src_dir);
+
+error_log(ob_get_clean()); // deferred output
 
 class test_runner {
 
     const valid_unittest   = '/^unittests(\/[a-z_]+)+\.test\.php$/'; // the convention
     //
     const report_testname  = 'mserrano - test_runner';
-    const report_dest_html = './tmp/php-coverage-report';
-    const report_dest_xml  = './tmp/php-coverage-report/index.xml';
+    const report_dest_html = '/tmp/php-coverage-report';
+    const report_dest_xml  = '/tmp/php-coverage-report/index.xml';
     const report_browser   = 'google-chrome';
 
+    protected $root;
+    protected $blacklist;
     protected $coverage;
     protected $error;
     protected $test_count;
     protected $silent;
 
-    public function __construct($silent) {
-        require_once('./vendor/autoload.php');
-        require_once('./vendor/simpletest/simpletest/autorun.php');
+    public function __construct($root_dir, $blacklist, $silent) {
+        $this->root      = $root_dir;
+        $this->blacklist = $blacklist;
+
+        require_once($this->root . '/vendor/autoload.php');
+        require_once($this->root . '/unittests/silent_autorun.php');
 
         $filter           = new SebastianBergmann\CodeCoverage\Filter();
         $this->coverage   = new SebastianBergmann\CodeCoverage\CodeCoverage(null, $filter);
@@ -127,7 +138,7 @@ class test_runner {
     }
 
     private function open_report_in_terminal() {
-        $xml_file = file_get_contents(test_runner::report_dest_xml);
+        $xml_file = file_get_contents($this->root . test_runner::report_dest_xml);
         $report   = simplexml_load_string($xml_file);
 
         $this->output_report_decorator();
@@ -163,10 +174,10 @@ class test_runner {
 
     protected function create_coverage_report() {
         $writer = new SebastianBergmann\CodeCoverage\Report\Html\Facade();
-        $writer->process($this->coverage, test_runner::report_dest_html);
+        $writer->process($this->coverage, $this->root . test_runner::report_dest_html);
 
         $writer = new SebastianBergmann\CodeCoverage\Report\Clover();
-        $writer->process($this->coverage, test_runner::report_dest_xml);
+        $writer->process($this->coverage, $this->root . test_runner::report_dest_xml);
 
         $writer = null;
     }
@@ -209,7 +220,9 @@ class test_runner {
     // --- helpers ---
     private function do_whitelist($path) {
         $extension = pathinfo($path, PATHINFO_EXTENSION);
-        if ($extension === 'php') {
+        $name      = pathinfo($path, PATHINFO_BASENAME);
+
+        if (($extension === 'php') && (in_array($name, $this->blacklist) === false)) {
             $list_dir = explode('/', pathinfo($path, PATHINFO_DIRNAME));
             if (in_array('csts', $list_dir) === false) { // ignore /csts
                 $class = sprintf('./%s', $path);
@@ -219,27 +232,30 @@ class test_runner {
     }
 
     private function do_test_case($ut_filename) {
-        list($ut_dir, $path, $classname) = $this->dissect_convention($ut_filename);
+        $name = pathinfo($ut_filename, PATHINFO_BASENAME);
+        if (in_array($name, $this->blacklist) === false) {
+            list($ut_dir, $path, $classname) = $this->dissect_convention($ut_filename);
 
-        $utclass = sprintf('./%s/%s/%s.test.php', $ut_dir, $path, $classname);
-        $class   = sprintf('./%s/%s.php', $path, $classname);
+            $utclass = sprintf('./%s/%s/%s.test.php', $ut_dir, $path, $classname);
+            $class   = sprintf('./%s/%s.php', $path, $classname);
 
-        $continue = true;
-        $continue = $continue && (preg_match(test_runner::valid_unittest, $ut_filename, $matches));
-        $continue = $continue && (empty($matches[0]) === false); // matched the full pattern
-        $continue = $continue && (file_exists($class) === true);
-        $continue = $continue && (file_exists($utclass) === true);
+            $continue = true;
+            $continue = $continue && (preg_match(test_runner::valid_unittest, $ut_filename, $matches));
+            $continue = $continue && (empty($matches[0]) === false); // matched the full pattern
+            $continue = $continue && (file_exists($class) === true);
+            $continue = $continue && (file_exists($utclass) === true);
 
-        if ($continue === true) {
-            require_once($utclass);
+            if ($continue === true) {
+                require_once($utclass);
 
-            $this->test_count += 1;
-        } else {
-            $this->error = array(
-                'file'        => $ut_filename,
-                'msg'         => 'no corresponding class found',
-                'exclamation' => helper_bash::exclamation('flip'),
-            );
+                $this->test_count += 1;
+            } else {
+                $this->error = array(
+                    'file'        => $ut_filename,
+                    'msg'         => 'no corresponding class found',
+                    'exclamation' => helper_bash::exclamation('flip'),
+                );
+            }
         }
     }
 

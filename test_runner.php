@@ -1,29 +1,34 @@
 <?php
-require_once('./vendor/autoload.php');
-require_once('./library/php/autoloader.php');
-autoloader::library(__DIR__);
+$root = dirname(__FILE__);
+require_once($root . '/vendor/autoload.php');
+require_once($root . '/library/php/autoloader.php');
+autoloader::library($root);
 
 // --- run it ---
 $src_dir    = $argv[1]; // source directory for test files
 $is_initial = $argv[2] ?? true; // will treat as descendent if present
+$blacklist  = ['silent_autorun.php', 'test_runner.php', 'test_coverage.php'];
 
-$obj    = new test_runner($is_initial);
-$to_run = $obj->run_tests($src_dir); // recursive, will return the base case
+$obj    = new test_runner($root, $is_initial);
+$to_run = $obj->run_tests($src_dir, $blacklist); // recursive, will return the base case
+
 if (is_null($to_run) === false) {
-    $single_test = new test_file($to_run);
+    $single_test = new test_file($root, $to_run);
     $single_test->run_test();
 }
 
 class test_runner {
 
+    protected $root;
     protected $is_initial;
     protected $list_error;
     protected $lock_file;
 
-    public function __construct($is_initial) {
+    public function __construct($root_dir, $is_initial) {
+        $this->root       = $root_dir;
         $this->is_initial = ($is_initial === true);
         $this->list_error = array();
-        $this->lock_file  = new lock_file('./tmp/php-coverage-report/lock.file');
+        $this->lock_file  = new lock_file($this->root . '/tmp/php-coverage-report/lock.file');
 
         if ($this->is_initial === true) {
             $this->lock_file->get_lock();
@@ -38,20 +43,23 @@ class test_runner {
         }
     }
 
-    public function run_tests($src_dir) {
+    public function run_tests($src_dir, $blacklist) {
         $return = null;
         if (empty($src_dir) === false) {
             if (is_dir($src_dir) === true) {
                 $pattern = sprintf('%s/*', rtrim($src_dir, '/'));
                 $files   = glob($pattern);
                 foreach ($files as $path) {
-                    $this->do_command(sprintf('php test_runner.php %s -d %s', $path, '2>&1'));
+                    $this->do_command(sprintf('php %s %s -d %s', __FILE__, $path, '2>&1'));
                 }
             } else {
                 if ($this->is_initial === true) {
-                    $this->do_command(sprintf('php test_runner.php %s -d %s', $src_dir, '2>&1'));
+                    $this->do_command(sprintf('php %s %s -d %s', __FILE__, $src_dir, '2>&1'));
                 } else {
-                    $return = $src_dir; // base case: src_dir is file, run tests
+                    $name = pathinfo($src_dir, PATHINFO_BASENAME);
+                    if (in_array($name, $blacklist) === false) {
+                        $return = $src_dir; // base case: src_dir is file, run tests
+                    }
                 }
             }
         }
@@ -128,6 +136,7 @@ class lock_file {
 
 class test_file {
 
+    protected $root;
     protected $ut_dir;
     protected $path;
     protected $name;
@@ -137,11 +146,12 @@ class test_file {
     protected $coverage;
     protected $error;
 
-    public function __construct($ut_file) {
+    public function __construct($root_dir, $ut_file) {
+        $this->root = $root_dir;
         list($this->ut_dir, $this->path, $this->name) = $this->dissect_convention($ut_file);
 
-        $this->ut_class = sprintf('%s/%s/%s.test.php', $this->ut_dir, $this->path, $this->name);
-        $this->class    = sprintf('%s/%s.php', $this->path, $this->name);
+        $this->ut_class = sprintf('%s/%s/%s/%s.test.php', $this->root, $this->ut_dir, $this->path, $this->name);
+        $this->class    = sprintf('%s/%s/%s.php', $this->root, $this->path, $this->name);
 
         $this->error = null;
         if (file_exists($this->class) === false) {
@@ -169,7 +179,7 @@ class test_file {
 
     public function run_test() {
         if (is_null($this->error) === true) {
-            require_once('./vendor/simpletest/simpletest/autorun.php');
+            require_once('./unittests/silent_autorun.php');
             require_once($this->ut_class);
             require_once($this->class);
         }
