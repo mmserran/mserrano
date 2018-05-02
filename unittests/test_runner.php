@@ -95,7 +95,7 @@ class test_runner {
             if (preg_match($pattern, $line) === 0) {
                 echo sprintf("%s %s", $line, PHP_EOL);
             }
-            if (preg_match('/(\/[a-z_\.]+\.php) line ([0-9]+)]/', $line, $matches) !== 0) {
+            if (preg_match('/(\/[a-z_\.]+\.php).*line ([0-9]+)/', $line, $matches) !== 0) {
                 $name        = $matches[1];
                 $line_number = $matches[2];
 
