@@ -12,6 +12,12 @@ class helper_fsTest extends UnitTestCase {
         
     }
 
+    function test_blacklist() {
+        $obj = helper_fs::blacklist();
+        $res = (is_array($obj) === true);
+        $this->assertTrue($res);
+    }
+
     function test_project_root() {
         $root = helper_fs::project_root();
         $res  = glob(sprintf('%s/*', $root));
