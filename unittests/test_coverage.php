@@ -1,5 +1,5 @@
 <?php
-$root = __DIR__;
+$root = dirname(__DIR__);
 require_once($root . '/library/php/autoloader.php');
 autoloader::library($root);
 
@@ -8,7 +8,7 @@ ob_start();
 
 $src_dir    = $argv[1]; // source directory for test files
 $silent_run = ($argv[2] ?? ''); // will not open browser if present
-$blacklist  = ['silent_autorun.php', 'test_runner.php', 'test_coverage.php'];
+$blacklist  = helper_fs::blacklist();
 
 $runner = new test_runner($root, $blacklist, $silent_run);
 $runner->run_tests($src_dir);

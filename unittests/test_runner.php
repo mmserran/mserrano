@@ -1,5 +1,5 @@
 <?php
-$root = dirname(__FILE__);
+$root = dirname(__DIR__);
 require_once($root . '/vendor/autoload.php');
 require_once($root . '/library/php/autoloader.php');
 autoloader::library($root);
@@ -7,7 +7,7 @@ autoloader::library($root);
 // --- run it ---
 $src_dir    = $argv[1]; // source directory for test files
 $is_initial = $argv[2] ?? true; // will treat as descendent if present
-$blacklist  = ['silent_autorun.php', 'test_runner.php', 'test_coverage.php'];
+$blacklist  = helper_fs::blacklist();
 
 $obj    = new test_runner($root, $is_initial);
 $to_run = $obj->run_tests($src_dir, $blacklist); // recursive, will return the base case

@@ -2,10 +2,10 @@
 
 class output {
 
-    const raw = 'raw';
-    const json = 'json';
+    const raw     = 'raw';
+    const json    = 'json';
     const angular = 'angular';
-    const pretty = 'pretty';
+    const pretty  = 'pretty';
 
     protected $headers;
     protected $content;
@@ -45,7 +45,9 @@ class output {
                 $this->add_header('Content-Type: text/plain');
                 break;
         }
-        $this->content = $data;
+        if (isset($data) === true) {
+            $this->content = $data;
+        }
     }
 
 }

@@ -15,12 +15,12 @@
     "preinstall": "(yarn global list | grep -q 'webpack') && : || yarn global add webpack",
     "dev": "webpack --mode development --watch",
     "prod": "webpack --mode production",
-    "test": "yarn karma start frontend/tests/coverage.conf.js && php test_coverage.php unittests/ --silent && google-chrome tmp/index.html",
+    "test": "yarn karma start frontend/tests/coverage.conf.js && php unittests/test_coverage.php unittests/ --silent && google-chrome tmp/index.html",
     "js:cov": "yarn karma start frontend/tests/coverage.conf.js && google-chrome tmp/js-coverage-report/index.html",
     "js": "yarn karma start frontend/tests/karma.conf.js",
-    "php:cov": "php test_coverage.php unittests/",
-    "php:cov:s": "php test_coverage.php unittests/ --silent",
-    "php": "yarn watch 'php test_runner.php unittests/'",
+    "php:cov": "php unittests/test_coverage.php unittests/",
+    "php:cov:s": "php unittests/test_coverage.php unittests/ --silent",
+    "php": "yarn watch 'php unittests/test_runner.php unittests/'",
     "?": "webpack --verbose"
   },
   "devDependencies": {

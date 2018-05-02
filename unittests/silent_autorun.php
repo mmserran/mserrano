@@ -1,4 +1,64 @@
 <?php
+
+// SimpleTest silent reporter
+class SilentReporter extends SimpleReporter {
+
+    public function __construct() {
+        parent::__construct();
+    }
+
+    public function paintGroupStart($test_name, $size) {}
+    public function paintGroupEnd($test_name) {}
+    public function paintCaseStart($test_name) {}
+    public function paintCaseEnd($test_name) {}
+    public function paintMethodStart($test_name) {}
+    public function paintMethodEnd($test_name) {}
+    public function paintPass($message) {}
+
+    public function paintFail($message) {
+        parent::paintFail($message);
+        print $this->getFailCount() . ") $message\n";
+        $breadcrumb = $this->getTestList();
+        $this->print_breadcrumb($breadcrumb);
+        print "\n";
+    }
+
+    public function paintError($message) {
+        parent::paintError($message);
+        print "Exception " . $this->getExceptionCount() . "!\n$message\n";
+        $breadcrumb = $this->getTestList();
+        $this->print_breadcrumb($breadcrumb);
+        print "\n";
+    }
+
+    public function paintException($exception) {
+        parent::paintException($exception);
+        $message    = 'Unexpected exception of type [' . get_class($exception) .
+                '] with message [' . $exception->getMessage() .
+                '] in [' . $exception->getFile() .
+                ' line ' . $exception->getLine() . ']';
+        print "Exception " . $this->getExceptionCount() . "!\n$message\n";
+        $breadcrumb = $this->getTestList();
+        $this->print_breadcrumb($breadcrumb);
+        print "\n";
+    }
+
+    public function paintSkip($message) {}
+    public function paintMessage($message) {}
+    public function paintFormattedMessage($message) {}
+    public function paintSignal($type, $payload) {}
+    public function error($type, $payload) {}
+
+    // --- helpers ---
+    private function print_breadcrumb($breadcrumb) {
+        array_shift($breadcrumb);
+        if(empty($breadcrumb) === false) {
+            $breadcrumb = array_reverse($breadcrumb);
+            print "\tin " . implode("\n\tin ", $breadcrumb);
+        }
+    }
+}
+
 /**
  *  Autorunner which runs all tests cases found in a file
  *  that includes this module.
@@ -51,7 +111,7 @@ function run_local_tests() {
         $loader     = new SimpleFileLoader();
         $suite      = $loader->createSuiteFromClasses(
                 basename(initial_file()), $loader->selectRunnableTests($candidates));
-        return $suite->run(new SimpleReporter());
+        return $suite->run(new SilentReporter());
     } catch (Exception $stack_frame_fix) {
         print $stack_frame_fix->getMessage();
         return false;
