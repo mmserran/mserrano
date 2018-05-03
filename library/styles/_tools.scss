@@ -1,0 +1,18 @@
+/*------------------------------------*\
+  # Tools
+    Note: use @include to use mixins.
+          use fn_name() to use functions.
+
+          Sass data types include:
+            + numbers
+            + strings
+            + colors
+            + booleans
+            + lists
+\*------------------------------------*/
+/* --- Functions --- */
+@function inverse($percent) {
+    @return (100 - $percent);
+}
+
+/* --- Mixins --- */
