@@ -133,17 +133,25 @@ amqplib@^0.5.2:
     readable-stream "1.x >=1.1.9"
     safe-buffer "^5.0.1"
 
+angular-animate@1.6.10:
+  version "1.6.10"
+  resolved "https://registry.yarnpkg.com/angular-animate/-/angular-animate-1.6.10.tgz#c520f6d341370e34e0a62060c99bcf47b7d7db8c"
+
+angular-aria@1.6.10:
+  version "1.6.10"
+  resolved "https://registry.yarnpkg.com/angular-aria/-/angular-aria-1.6.10.tgz#472bfff8682c4cfe634d4bfda0524443e07e3501"
+
 angular-material@1.1.9:
   version "1.1.9"
   resolved "https://registry.yarnpkg.com/angular-material/-/angular-material-1.1.9.tgz#840574f8701629fc39eadfea7fd8e235cc5d97c6"
 
-angular-mocks@1.6.5:
-  version "1.6.5"
-  resolved "https://registry.yarnpkg.com/angular-mocks/-/angular-mocks-1.6.5.tgz#c62f8014cc6d3ed3fd1b383a634ca0009af3efee"
+angular-mocks@1.6.10:
+  version "1.6.10"
+  resolved "https://registry.yarnpkg.com/angular-mocks/-/angular-mocks-1.6.10.tgz#6a139e43c461d0c9a5a1acebc91e63db16031176"
 
-angular-route@1.6.5:
-  version "1.6.5"
-  resolved "https://registry.yarnpkg.com/angular-route/-/angular-route-1.6.5.tgz#af45593299f55874d0261018adb11520a3817d2a"
+angular-route@1.6.10:
+  version "1.6.10"
+  resolved "https://registry.yarnpkg.com/angular-route/-/angular-route-1.6.10.tgz#4247a32eab19495624623e96c1626dfba17ebf21"
 
 angular-templatecache-loader@0.2.0:
   version "0.2.0"
@@ -155,11 +163,13 @@ angular-templatecache-loader@0.2.0:
     loader-utils "^0.2.11"
     path "^0.12.7"
 
-angular@1.6.5:
-  version "1.6.5"
-  resolved "https://registry.yarnpkg.com/angular/-/angular-1.6.5.tgz#37f788eebec5ce2e3fa02b17bbcb2a231576a0d6"
+angular-translate@2.17.1:
+  version "2.17.1"
+  resolved "https://registry.yarnpkg.com/angular-translate/-/angular-translate-2.17.1.tgz#0fe526cabd6f6b39db34e344047f0e3c1978296e"
+  dependencies:
+    angular ">=1.2.26 <=1.6"
 
-angular@^1.5.0-beta.0:
+angular@1.6.10, "angular@>=1.2.26 <=1.6", angular@^1.5.0-beta.0:
   version "1.6.10"
   resolved "https://registry.yarnpkg.com/angular/-/angular-1.6.10.tgz#eed3080a34d29d0f681ff119b18ce294e3f74826"
 

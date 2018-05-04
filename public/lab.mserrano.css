@@ -36,22 +36,132 @@
 /* --- Fonts --- */
 /* --- Colors --- */
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; }
-  @media screen and (min-width: 0) and (max-width: 599px) {
-    body {
-      background: #EF5734; } }
-  @media screen and (min-width: 600px) and (max-width: 959px) {
-    body {
-      background: #1D99F3; } }
-  @media screen and (min-width: 960px) and (max-width: 1279px) {
-    body {
-      background: #FFC420; } }
-  @media screen and (min-width: 1280px) and (max-width: 1919px) {
-    body {
-      background: #006BB6; } }
-  @media screen and (min-width: 1920px) {
-    body {
-      background: #000000; } }
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-size: 12px;
+  background: url("/resources/img/wp_sitedown.jpg");
+  background-size: cover; }
+/*------------------------------------*\
+  # mserrano / Inverted Triangle CSS
+\*------------------------------------*/
+/*------------------------------------*\
+  # Variables
+\*------------------------------------*/
+/* --- Media Breakpoints --- */
+/* --- Colors --- */
+/*------------------------------------*\
+  # Tools
+    Note: use @include to use mixins.
+          use fn_name() to use functions.
+
+          Sass data types include:
+            + numbers
+            + strings
+            + colors
+            + booleans
+            + lists
+\*------------------------------------*/
+/* --- Functions --- */
+/* --- Mixins --- */
+/*------------------------------------*\
+  # Configurable Settings
+    Note: must be completed so that the
+          api_layer can work correctly.
+\*------------------------------------*/
+/* --- Spacing --- */
+/* --- Fonts --- */
+/* --- Colors --- */
+/*------------------------------------*\
+  # Communication Layer to App
+    Note: this is for REFERENCE ONLY!!
+\*------------------------------------*/
+/* --- Spacing --- */
+/* --- Fonts --- */
+/* --- Colors --- */
+/*------------------------------------*\
+  # mserrano / Inverted Triangle CSS
+\*------------------------------------*/
+/*------------------------------------*\
+  # Variables
+\*------------------------------------*/
+/* --- Media Breakpoints --- */
+/* --- Colors --- */
+/*------------------------------------*\
+  # Tools
+    Note: use @include to use mixins.
+          use fn_name() to use functions.
+
+          Sass data types include:
+            + numbers
+            + strings
+            + colors
+            + booleans
+            + lists
+\*------------------------------------*/
+/* --- Functions --- */
+/* --- Mixins --- */
+/*------------------------------------*\
+  # Configurable Settings
+    Note: must be completed so that the
+          api_layer can work correctly.
+\*------------------------------------*/
+/* --- Spacing --- */
+/* --- Fonts --- */
+/* --- Colors --- */
+/*------------------------------------*\
+  # Communication Layer to App
+    Note: this is for REFERENCE ONLY!!
+\*------------------------------------*/
+/* --- Spacing --- */
+/* --- Fonts --- */
+/* --- Colors --- */
+body {
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-size: 12px;
+  background: url("/resources/img/wp_sitedown.jpg");
+  background-size: cover; }
+
+.page--sitedown .md-button {
+  background: rgba(0, 107, 182, 0.6);
+  color: #FFFFFF; }
+  .page--sitedown .md-button.md-raised:not([disabled]):hover, .page--sitedown .md-button.md-fab:not([disabled]):hover {
+    background: #004d83; }
+
+.page--sitedown .page__toolbar {
+  background: rgba(0, 107, 182, 0.6);
+  border-bottom: 6px solid rgba(255, 196, 32, 0.6);
+  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12); }
+
+.page--sitedown .page__content {
+  height: 100%;
+  background: transparent; }
+  .page--sitedown .page__content .sitedown {
+    min-width: 36%;
+    margin-top: 64px;
+    padding: 32px;
+    background: #FFFFFF;
+    border-radius: 2px;
+    font-size: 32px;
+    text-align: center;
+    opacity: 0.96; }
+    .page--sitedown .page__content .sitedown .sitedown__decor {
+      font-weight: 600; }
+
+.page--sitedown .leftside {
+  margin-left: 8px;
+  padding: 8px; }
+
+.fixed-bottom-right {
+  position: fixed;
+  right: 8px;
+  bottom: 8px; }
+  .fixed-bottom-right .button__text {
+    font-size: 26px; }
+
+.tooltip__text {
+  font-size: 14px;
+  padding: 24px; }
 html, body {
   height: 100%;
   position: relative; }
