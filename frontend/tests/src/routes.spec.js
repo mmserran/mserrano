@@ -37,36 +37,8 @@ describe("!! routes.js !! ", function () {
     });
 
     describe("route", function () {
-        describe("landing", function () {
-            var path = "/";
-            beforeEach(function () {
-                obj = $route.routes[path];
-            });
-
-            it("should be defined", function () {
-                var err_msg = "Expected route \"" + path + "\" to be defined";
-                expect(obj).toBeDefined(err_msg);
-
-                if (angular.isDefined(obj) === true) {
-                    $location.path(path);
-                    expect($route.current).toBeUndefined();
-                    $rootScope.$digest();
-                    expect($route.current.controller).toEqual("LandingCtrl");
-                }
-            });
-
-            it("should have valid templateUrl", function () {
-                var res = $templateCache.get(obj.templateUrl);
-                expect(res).toEqual(jasmine.any(String));
-            });
-
-            it("should have valid controller", function () {
-                expect(obj.controller).toEqual(jasmine.any(String));
-            });
-        });
-
         describe("sitedown", function () {
-            var path = "/sitedown";
+            var path = "/";
             beforeEach(function () {
                 obj = $route.routes[path];
             });
@@ -98,7 +70,7 @@ describe("!! routes.js !! ", function () {
                 $location.path("/unrecognized-page-DNE");
                 expect($route.current).toBeUndefined();
                 $rootScope.$digest();
-                expect($route.current.controller).toEqual("LandingCtrl");
+                expect($route.current.controller).toEqual("SiteDownCtrl");
             });
         });
     });

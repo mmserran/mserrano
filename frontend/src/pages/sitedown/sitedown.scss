@@ -1,3 +1,21 @@
+@import 'Const';
+
 body {
-    background: blue;
+    font-family: $font-family;
+
+    @include layout('xs') {
+        background: $red-bower;
+    }
+    @include layout('sm') {
+        background: $blue-konqui;
+    }
+    @include layout('md') {
+        background: $yellow-scw;
+    }
+    @include layout('lg') {
+        background: $blue-scw;
+    }
+    @include layout('xl') {
+        background: $black;
+    }
 }
