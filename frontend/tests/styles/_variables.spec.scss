@@ -1,0 +1,12 @@
+/*------------------------------------*\
+  # _variables.spec.scss
+\*------------------------------------*/
+/* --- Media Breakpoints --- */
+@include it('_variables.spec.scss : Media Breakpoints') {
+    @include assert-unequal('TODO', 'soon');
+}
+
+/* --- Colors --- */
+@include it('_variables.spec.scss : Colors') {
+    @include assert-unequal('TODO', 'soon');
+}

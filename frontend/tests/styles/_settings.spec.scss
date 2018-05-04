@@ -1,0 +1,36 @@
+/*------------------------------------*\
+  # _settings.spec.scss
+\*------------------------------------*/
+/* --- Spacing --- */
+@include it('_settings.spec.scss : Spacing : unit') {
+    @include assert-unequal('TODO', 'soon');
+}
+
+/* --- Fonts --- */
+@include it('_settings.spec.scss : Fonts : font-family') {
+    @include assert-unequal('TODO', 'soon');
+}
+@include it('_settings.spec.scss : Fonts : font-text') {
+    @include assert-unequal('TODO', 'soon');
+
+}
+@include it('_settings.spec.scss : Fonts : font-title') {
+    @include assert-unequal('TODO', 'soon');
+}
+@include it('_settings.spec.scss : Fonts : font-sub') {
+    @include assert-unequal('TODO', 'soon');
+}
+
+/* --- Colors --- */
+@include it('_settings.spec.scss : Colors : primary-dark') {
+    @include assert-unequal('TODO', 'soon');
+}
+@include it('_settings.spec.scss : Colors : primary-light') {
+    @include assert-unequal('TODO', 'soon');
+}
+@include it('_settings.spec.scss : Colors : secondary-dark') {
+    @include assert-unequal('TODO', 'soon');
+}
+@include it('_settings.spec.scss : Colors : secondary-light') {
+    @include assert-unequal('TODO', 'soon');
+}

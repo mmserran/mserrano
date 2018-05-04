@@ -87,6 +87,11 @@ y js
 y php
 ```
 
+# watch SASS tests
+```shell
+y css
+```
+
 # run JS coverage tests
 ```shell
 y js:cov

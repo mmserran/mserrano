@@ -1,0 +1,22 @@
+/*------------------------------------*\
+  # _tools.spec.scss
+\*------------------------------------*/
+/* --- Functions --- */
+@include it('_tools.spec.scss : Function : inverse') {
+    $obj: 20;
+    $exp: 80;
+    $res: inverse($obj);
+
+    @include assert-equal($exp, $res);
+}
+@include it('_tools.spec.scss : Function : begins-with') {
+    @include assert-unequal('TODO', 'soon');
+}
+@include it('_tools.spec.scss : Function : strip') {
+    @include assert-unequal('TODO', 'soon');
+}
+
+/* --- Mixins --- */
+@include it('_tools.spec.scss : Mixins : layout') {
+    @include assert-unequal('TODO', 'soon');
+}
