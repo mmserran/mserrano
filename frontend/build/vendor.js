@@ -1,16 +1,9 @@
-// test for javascript vendor files
-var require_all = require.context("../../library/javascript", true, /.+\.js$/);
-var list_vendor = require_all.keys();
+// ======================================
+// # Javascript Vendor Files
+// ======================================
+helper = require('./_helper');
 
-// load AngularJS
-var angularjs = list_vendor.splice(list_vendor.indexOf("./angular.js"), 1);
-require_all(angularjs[0]);
-
-// remove angular-mocks
-list_vendor.splice(list_vendor.indexOf("./angular-mocks.js"), 1);
-
-// load all other vendor javascript
-for (var i = 0; i < list_vendor.length; ++i) {
-    var key = list_vendor[i];
-    require_all(key);
-}
+var require_vendor_js = require.context("../../library/javascript", true, /.+\.js$/);
+var list_vendor = helper.load_and_remove(require_vendor_js, './angular.js'); // load AngularJS first
+list_vendor.splice(list_vendor.indexOf("./angular-mocks.js"), 1); // remove angular-mocks
+helper.load_selected(require_vendor_js, list_vendor); // load all other vendor javascript

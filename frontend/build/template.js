@@ -1,9 +1,8 @@
-// test for html source files
-var require_all = require.context('../src/', true, /.+\.(html)$/);
-var list_file = require_all.keys();
+// ======================================
+// # Necessary for JS coverage tests 
+// ======================================
+helper = require('./_helper');
 
 // load all html in src directory
-for (var i = 0; i < list_file.length; i++) {
-    var key = list_file[i];
-    require_all(key);
-}
+var require_all_template = require.context('../src/', true, /.+\.(html)$/);
+helper.load_all(require_all_template);

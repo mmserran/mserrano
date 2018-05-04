@@ -120,5 +120,4 @@ y ?
 /tmp/**
 yarn-error.log
 /vendor/**
-/public/template.mserrano.js
 ```

@@ -8,7 +8,7 @@ module.exports = function (config) {
             'public/vendor.mserrano.js',
             'library/javascript/angular-mocks.js',
             'frontend/src/**/*.js',
-            'public/template.mserrano.js',
+            'tmp/trash/template.scratch',
             'frontend/tests/helpers/helpers.*.js',
             'frontend/tests/src/**/*.spec.js',
         ],
