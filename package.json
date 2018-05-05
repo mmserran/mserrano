@@ -13,6 +13,7 @@
     "angular-material": "1.1.9",
     "angular-mocks": "1.6.10",
     "angular-route": "1.6.10",
+    "angular-sanitize": "1.6.10",
     "angular-translate": "2.17.1"
   },
   "scripts": {

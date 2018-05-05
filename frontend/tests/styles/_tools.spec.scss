@@ -3,20 +3,95 @@
 \*------------------------------------*/
 /* --- Functions --- */
 @include it('_tools.spec.scss : Function : inverse') {
-    $obj: 20;
-    $exp: 80;
-    $res: inverse($obj);
-
-    @include assert-equal($exp, $res);
+    $tests: 
+        // (input, expected)
+        (20, 80),
+        (60%, 40%),
+        (55px, 45px),
+        (0.25, 99.75);
+    @each $input, $exp in $tests {
+        $res: inverse($input);
+        @include assert-equal($exp, $res);
+    }
 }
 @include it('_tools.spec.scss : Function : begins-with') {
-    @include assert-unequal('TODO', 'soon');
+    $rnd_string: map-get((
+        1: 'gt-sm',
+        2: 'gt-xs',
+        3: 'gt-md',
+        4: 'gt-lg',
+        ), ceil(random() * 4));
+    $tests: 
+        // (string, find, expected)
+        ('lab.mserrano', 'lab.', true),
+        ('sm', 'gt-', false),
+        ($rnd_string, 'gt-', true);
+    @each $string, $find, $exp in $tests {
+        $res: begins-with($string, $find);
+        @include assert-equal($exp, $res);
+    }
 }
 @include it('_tools.spec.scss : Function : strip') {
-    @include assert-unequal('TODO', 'soon');
+    // will only strip if found at beginning of string
+    $rnd_string: map-get((
+        1: 'gt-sm',
+        2: 'gt-xs',
+        3: 'gt-md',
+        4: 'gt-lg',
+        ), ceil(random() * 4));
+    $tests: 
+        // (string, to_strip, expected)
+        ('lab.mserrano', 'lab.', 'mserrano'),
+        ('sm', 'gt-', 'sm'),
+        ($rnd_string, '', $rnd_string),
+        ('this-is-a-string', 'this-is-a', '-string');
+    @each $string, $to_strip, $exp in $tests {
+        $res: strip($string, $to_strip);
+        @include assert-equal($exp, $res);
+    }
 }
 
 /* --- Mixins --- */
 @include it('_tools.spec.scss : Mixins : layout') {
-    @include assert-unequal('TODO', 'soon');
+    $rnd: random();
+    $tests: 
+        // (breakpoint, exp_min)
+        ('gt-xs', 600px),
+        ('gt-sm', 960px),
+        ('gt-md', 1280px),
+        ('gt-lg', 1920px);
+    @each $breakpoint, $exp_min in $tests {
+        @include assert {
+            @include output {
+                @include layout($breakpoint) {
+                    opacity: $rnd;
+                }
+            }
+            @include expect {
+                @media screen and (min-width: $exp_min) {
+                    opacity: $rnd;
+                }
+            }
+        }
+    }
+    $tests: 
+        // (breakpoint, exp_min, exp_max)
+        ('xs', 0, 599px),
+        ('sm', 600px, 959px),
+        ('md', 960px, 1279px),
+        ('lg', 1280px, 1919px);
+    @each $breakpoint, $exp_min, $exp_max in $tests {
+        @include assert {
+            @include output {
+                @include layout($breakpoint) {
+                    opacity: $rnd;
+                }
+            }
+            @include expect {
+                @media screen and (min-width: $exp_min) and (max-width: $exp_max) {
+                    opacity: $rnd;
+                }
+            }
+        }
+    }
 }

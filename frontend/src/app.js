@@ -1,5 +1,6 @@
 angular.module("lab", [
     "pascalprecht.translate",
+    "ngSanitize",
     "ngMaterial",
     "ngAnimate",
     "ngAria",
