@@ -22,8 +22,10 @@
     "prod": "webpack --mode production",
     "test": "yarn karma start frontend/tests/coverage.conf.js && php unittests/test_coverage.php unittests/ --silent && node frontend/tests/sass-true.conf.js && google-chrome tmp/index.html",
     "js:cov": "yarn karma start frontend/tests/coverage.conf.js && google-chrome tmp/js-coverage-report/index.html",
+    "test:js": "yarn karma start frontend/tests/coverage.conf.js && google-chrome tmp/js-coverage-report/index.html",
     "js": "yarn karma start frontend/tests/karma.conf.js",
     "php:cov": "php unittests/test_coverage.php unittests/",
+    "test:php": "php unittests/test_coverage.php unittests/",
     "php:cov:s": "php unittests/test_coverage.php unittests/ --silent",
     "php": "yarn watch 'php unittests/test_runner.php unittests/'",
     "css": "yarn watch 'node frontend/tests/sass-true.conf.js'",
@@ -46,11 +48,13 @@
     "karma-webpack": "3.0.0",
     "ng-annotate-loader": "0.6.1",
     "node-sass": "4.8.3",
-    "sass-loader": "7.0.1",
+    "postcss-discard-comments": "2.0.4",
+    "postcss-loader": "2.1.5",
+    "sass-loader": "7.0.3",
     "sass-true": "4.0.0",
     "style-loader": "0.20.3",
     "watch": "1.0.2",
-    "webpack": "4.7.0",
+    "webpack": "4.11.1",
     "webpack-cli": "2.0.14"
   }
 }

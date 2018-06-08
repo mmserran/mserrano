@@ -1,0 +1,9 @@
+/.gitignore.default
+/nbproject/**
+/.gitignore
+/node_modules/**
+/tmp/**
+yarn-error.log
+/vendor/**
+/public/*.map
+/public/template.mserrano.js

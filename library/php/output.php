@@ -2,10 +2,11 @@
 
 class output {
 
-    const raw     = 'raw';
-    const json    = 'json';
     const angular = 'angular';
+    const html    = 'html';
+    const json    = 'json';
     const pretty  = 'pretty';
+    const raw     = 'raw';
 
     protected $headers;
     protected $content;
@@ -28,12 +29,16 @@ class output {
 
     public function format($content, $type) {
         switch ($type) {
-            case output::json:
-                $data = json_encode($content);
-                $this->add_header('Content-Type: application/json');
-                break;
             case output::angular:
                 $data = sprintf(")]}',\n%s", json_encode($content));
+                $this->add_header('Content-Type: application/json');
+                break;
+            case output::html:
+                $data = $content;
+                $this->add_header('Content-Type: text/html');
+                break;
+            case output::json:
+                $data = json_encode($content);
                 $this->add_header('Content-Type: application/json');
                 break;
             case output::pretty:

@@ -8,7 +8,7 @@ autoloader::library($root);
 $midtier = router::get_page($root);
 if (is_null($midtier) === false) {
     // collect get, post, files
-    $input = new input($_GET, $_POST);
+    $input = new input($_GET, file_get_contents("php://input"));
     $midtier->register_input($input);
 
     // build it

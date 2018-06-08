@@ -45,6 +45,7 @@
                 100% { opacity: .1; }
             }
         </style>
+        <link rel="stylesheet" href="vendor.mserrano.%_VENDOR-CSS_%.css">
     </head>
     <body>
         <div class="pre-loaded pre-spinner container">
@@ -55,7 +56,7 @@
             </div>
         </div>
         <div ng-view></div>
-        <script src="/vendor.mserrano.js"></script>
-        <script id="apploader" src="/apploader.min.js?js=lab.mserrano.js&css=lab.mserrano.css&const=%2Flab_constants&app=lab"></script>
+        <script src="/vendor.mserrano.%_VENDOR-JS_%.js"></script>
+        <script id="apploader" src="%_MSERRANO-DEV_%"></script>
     </body>
 </html>
